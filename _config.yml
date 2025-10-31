@@ -1,0 +1,16 @@
+# Jekyll configuration for GitHub Pages
+# This ensures proper handling of files and directories
+
+# Exclude unnecessary files from the build
+exclude:
+  - README.md
+  - .gitignore
+  - .github/
+
+# Include all necessary files
+include:
+  - CNAME
+
+# Disable Jekyll processing for static site
+# This tells Jekyll to serve files as-is without processing
+markdown: kramdown

@@ -26,50 +26,83 @@ digitalpulse-tld/
 
 ## 🚀 Deployment Options
 
-### Option 1: GitHub Pages (FREE)
+### Option 1: GitHub Pages (FREE) - RECOMMENDED
 
-1. Create a new GitHub repository
-2. Push these files to the repository
-3. Go to Settings → Pages
-4. Select "main" branch as source
-5. Your site will be live at `https://yourusername.github.io/repo-name/`
+This repository is configured with GitHub Actions for automatic deployment to GitHub Pages.
 
-**DNS Setup for chainpulse.network:**
+**Automatic Deployment:**
+1. The site is automatically deployed when you push to the `main` branch
+2. GitHub Actions workflow (`.github/workflows/pages.yml`) handles the deployment
+3. No manual configuration needed - it's already set up!
+
+**Enable GitHub Pages (One-time setup):**
+1. Go to your repository Settings → Pages
+2. Under "Build and deployment":
+   - Source: Select "GitHub Actions"
+3. Your site will be live at `https://kfrye1212.github.io/digitalpulse-tld/`
+
+**Custom Domain Setup (chainpulse.network):**
+
+The repository includes a `CNAME` file configured for `chainpulse.network`.
+
+To activate the custom domain:
+1. In your GitHub repository: Settings → Pages → Custom domain
+2. Enter: `chainpulse.network`
+3. Click "Save"
+4. Wait for DNS check to complete
+
+**DNS Configuration at your domain provider:**
 ```
-Type: CNAME
+Type: A Records (for apex domain)
+Name: @
+Values: 
+  185.199.108.153
+  185.199.109.153
+  185.199.110.153
+  185.199.111.153
+TTL: 600
+
+Type: CNAME (for www subdomain)
 Name: www
-Value: yourusername.github.io
+Value: kfrye1212.github.io
 TTL: 600
 ```
 
-### Option 2: Vercel (FREE)
+**Alternative: Use www subdomain only**
+```
+Type: CNAME
+Name: @
+Value: kfrye1212.github.io
+TTL: 600
+```
+
+### Option 2: Vercel (Alternative)
 
 1. Push files to GitHub
 2. Import repository to Vercel
 3. Deploy automatically
 4. Add custom domain in Vercel settings
 
-### Option 3: Netlify (FREE)
+### Option 3: Netlify (Alternative)
 
 1. Drag and drop the folder to Netlify
 2. Or connect GitHub repository
 3. Add custom domain in settings
 
-## 🔗 Custom Domain Setup
+## 🔗 Custom Domain Verification
 
-### For chainpulse.network:
+After DNS setup, verify your configuration:
+1. Visit https://www.whatsmydns.net/
+2. Enter your domain name
+3. Check A or CNAME records globally
+4. Wait 5-30 minutes for full DNS propagation
+5. Enable "Enforce HTTPS" in GitHub Pages settings (recommended)
 
-**In GoDaddy (or your DNS provider):**
-
-1. Add CNAME record:
-   - Name: `www`
-   - Value: `your-deployment-url` (from GitHub Pages/Vercel/Netlify)
-   - TTL: 600
-
-2. Add URL redirect (optional):
-   - Redirect `chainpulse.network` → `www.chainpulse.network`
-
-**Wait 5-30 minutes for DNS propagation**
+**Troubleshooting:**
+- Clear your browser cache if the site doesn't load
+- Verify DNS records are pointing to the correct values
+- Check GitHub Pages build status in Actions tab
+- Ensure CNAME file contains only the domain name (no http:// or trailing slash)
 
 ## ⚙️ Configuration
 
