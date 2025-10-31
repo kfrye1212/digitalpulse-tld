@@ -7,7 +7,6 @@ This checklist helps verify that the GitHub Pages and custom domain setup is com
 - [x] `.github/workflows/pages.yml` - GitHub Actions workflow
 - [x] `CNAME` - Custom domain configuration
 - [x] `.nojekyll` - Bypass Jekyll processing
-- [x] `_config.yml` - Jekyll config (backup)
 - [x] `.gitignore` - Git ignore rules
 - [x] `DEPLOYMENT.md` - Deployment guide
 

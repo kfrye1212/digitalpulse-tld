@@ -120,7 +120,6 @@ Then set up a redirect from apex to www in your DNS provider.
 - `.github/workflows/pages.yml` - GitHub Actions workflow for deployment
 - `CNAME` - Custom domain configuration
 - `.nojekyll` - Bypasses Jekyll processing (important for static sites)
-- `_config.yml` - Jekyll configuration (backup)
 - `.gitignore` - Git ignore rules
 
 ## Additional Resources
