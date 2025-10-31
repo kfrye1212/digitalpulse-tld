@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Pulse - Web3 Domain Registration</title>
+    <meta name="description" content="Register your .pulse, .verse, .cp, or .pv domain on Solana blockchain. Instant registration, full ownership, decentralized DNS.">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-pulse flex items-center justify-center">
+                        <span class="text-black font-bold text-xl">DP</span>
+                    </div>
+                    <span class="text-2xl font-bold text-gradient">Digital Pulse</span>
+                </div>
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="index.html" class="text-cyan-400">Search</a>
+                    <a href="my-domains.html" class="hover:text-cyan-400 transition-colors">My Domains</a>
+                    <a href="marketplace.html" class="hover:text-cyan-400 transition-colors">Marketplace</a>
+                    <a href="https://chainpulse.info" target="_blank" class="hover:text-cyan-400 transition-colors">About PULSE</a>
+                    <button id="connectWallet" class="btn btn-primary glow-cyan">Connect Wallet</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section with Search -->
+    <section class="relative pt-32 pb-20 hero-bg min-h-screen flex items-center">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl mx-auto text-center">
+                <h1 class="text-5xl md:text-7xl font-bold mb-6">
+                    Your <span class="text-gradient">Web3 Identity</span><br/>
+                    Starts Here
+                </h1>
+                <p class="text-xl text-gray-300 mb-12">
+                    Register decentralized domains on Solana blockchain.<br/>
+                    Own your digital identity forever.
+                </p>
+                
+                <!-- Domain Search -->
+                <div class="card max-w-3xl mx-auto mb-8">
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <input 
+                            type="text" 
+                            id="domainSearch" 
+                            placeholder="Search for your domain..." 
+                            class="flex-1 px-6 py-4 bg-gray-900 border border-cyan-500/30 rounded-lg text-white focus:outline-none focus:border-cyan-500 text-lg"
+                        />
+                        <select 
+                            id="tldSelect" 
+                            class="px-6 py-4 bg-gray-900 border border-cyan-500/30 rounded-lg text-white focus:outline-none focus:border-cyan-500 text-lg"
+                        >
+                            <option value=".pulse">.pulse</option>
+                            <option value=".verse">.verse</option>
+                            <option value=".cp">.cp</option>
+                            <option value=".pv">.pv</option>
+                        </select>
+                        <button 
+                            id="searchBtn" 
+                            class="btn btn-primary px-8 py-4 text-lg whitespace-nowrap"
+                        >
+                            Search
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Search Results -->
+                <div id="searchResults" class="hidden">
+                    <div class="card max-w-3xl mx-auto">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="text-left">
+                                <h3 class="text-2xl font-bold mb-2">
+                                    <span id="resultDomain"></span>
+                                </h3>
+                                <p id="resultStatus" class="text-gray-400"></p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-gray-400 text-sm mb-1">Registration Fee</p>
+                                <p class="text-3xl font-bold text-gradient">0.25 SOL</p>
+                            </div>
+                        </div>
+                        <button id="registerBtn" class="btn btn-primary w-full py-4 text-lg">
+                            Register Domain →
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Popular TLDs -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
+                    <div class="card text-center hover:scale-105 transition-transform cursor-pointer tld-card" data-tld=".pulse">
+                        <div class="text-4xl mb-3">💎</div>
+                        <h3 class="text-xl font-bold text-gradient">.pulse</h3>
+                        <p class="text-gray-400 text-sm mt-2">Core ecosystem</p>
+                    </div>
+                    <div class="card text-center hover:scale-105 transition-transform cursor-pointer tld-card" data-tld=".verse">
+                        <div class="text-4xl mb-3">🌐</div>
+                        <h3 class="text-xl font-bold text-gradient">.verse</h3>
+                        <p class="text-gray-400 text-sm mt-2">Metaverse ready</p>
+                    </div>
+                    <div class="card text-center hover:scale-105 transition-transform cursor-pointer tld-card" data-tld=".cp">
+                        <div class="text-4xl mb-3">⚡</div>
+                        <h3 class="text-xl font-bold text-gradient">.cp</h3>
+                        <p class="text-gray-400 text-sm mt-2">Cyberpunk style</p>
+                    </div>
+                    <div class="card text-center hover:scale-105 transition-transform cursor-pointer tld-card" data-tld=".pv">
+                        <div class="text-4xl mb-3">🔮</div>
+                        <h3 class="text-xl font-bold text-gradient">.pv</h3>
+                        <p class="text-gray-400 text-sm mt-2">Premium choice</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-20 bg-gradient-to-b from-transparent to-black/30">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold mb-4">
+                    Why <span class="text-gradient">Digital Pulse</span>?
+                </h2>
+                <p class="text-xl text-gray-400">
+                    The most advanced Web3 domain service on Solana
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                <div class="card text-center">
+                    <div class="text-5xl mb-4">🔒</div>
+                    <h3 class="text-2xl font-bold mb-3">True Ownership</h3>
+                    <p class="text-gray-400">Your domain is an NFT on Solana. You own it completely, forever.</p>
+                </div>
+                
+                <div class="card text-center">
+                    <div class="text-5xl mb-4">⚡</div>
+                    <h3 class="text-2xl font-bold mb-3">Instant Registration</h3>
+                    <p class="text-gray-400">Register in seconds with sub-second Solana transactions.</p>
+                </div>
+                
+                <div class="card text-center">
+                    <div class="text-5xl mb-4">💰</div>
+                    <h3 class="text-2xl font-bold mb-3">Low Fees</h3>
+                    <p class="text-gray-400">Only 0.25 SOL to register. 0.15 SOL to renew annually.</p>
+                </div>
+                
+                <div class="card text-center">
+                    <div class="text-5xl mb-4">🔄</div>
+                    <h3 class="text-2xl font-bold mb-3">Tradeable</h3>
+                    <p class="text-gray-400">Buy, sell, or transfer domains on our integrated marketplace.</p>
+                </div>
+                
+                <div class="card text-center">
+                    <div class="text-5xl mb-4">🌐</div>
+                    <h3 class="text-2xl font-bold mb-3">Decentralized DNS</h3>
+                    <p class="text-gray-400">No central authority. Your domain, your rules.</p>
+                </div>
+                
+                <div class="card text-center">
+                    <div class="text-5xl mb-4">🎯</div>
+                    <h3 class="text-2xl font-bold mb-3">Multi-Use</h3>
+                    <p class="text-gray-400">Use for websites, wallets, social profiles, and more.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="py-20">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl mx-auto">
+                <div class="text-center mb-12">
+                    <h2 class="text-4xl md:text-5xl font-bold mb-4">
+                        Simple <span class="text-gradient">Pricing</span>
+                    </h2>
+                    <p class="text-xl text-gray-400">
+                        No hidden fees. Pay once, own forever (with annual renewal).
+                    </p>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="card">
+                        <h3 class="text-2xl font-bold mb-4">Registration</h3>
+                        <div class="text-5xl font-bold text-gradient mb-4">0.25 SOL</div>
+                        <p class="text-gray-400 mb-6">One-time registration fee</p>
+                        <ul class="space-y-3 text-gray-300">
+                            <li>✅ Lifetime ownership</li>
+                            <li>✅ Full control & transfer rights</li>
+                            <li>✅ Tradeable NFT</li>
+                            <li>✅ Decentralized storage</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="card">
+                        <h3 class="text-2xl font-bold mb-4">Renewal</h3>
+                        <div class="text-5xl font-bold text-gradient mb-4">0.15 SOL</div>
+                        <p class="text-gray-400 mb-6">Annual renewal (optional)</p>
+                        <ul class="space-y-3 text-gray-300">
+                            <li>✅ Keep your domain active</li>
+                            <li>✅ Maintain DNS records</li>
+                            <li>✅ Priority support</li>
+                            <li>✅ Early access to features</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="card mt-8 bg-gradient-to-r from-cyan-500/10 to-pink-500/10">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-xl font-bold mb-2">🎁 Launch Special</h3>
+                            <p class="text-gray-300">First 1000 registrations get 50% off renewal fees for life!</p>
+                        </div>
+                        <button class="btn btn-primary">Register Now →</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black/50 border-t border-cyan-500/20 py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-8 h-8 rounded-full bg-gradient-pulse flex items-center justify-center">
+                            <span class="text-black font-bold">DP</span>
+                        </div>
+                        <span class="text-xl font-bold text-gradient">Digital Pulse</span>
+                    </div>
+                    <p class="text-gray-400">
+                        Web3 domain registration on Solana blockchain
+                    </p>
+                </div>
+                
+                <div>
+                    <h3 class="font-bold mb-4">Platform</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="index.html" class="hover:text-cyan-400 transition-colors">Search Domains</a></li>
+                        <li><a href="my-domains.html" class="hover:text-cyan-400 transition-colors">My Domains</a></li>
+                        <li><a href="marketplace.html" class="hover:text-cyan-400 transition-colors">Marketplace</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="font-bold mb-4">Resources</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-cyan-400 transition-colors">Documentation</a></li>
+                        <li><a href="#" class="hover:text-cyan-400 transition-colors">API</a></li>
+                        <li><a href="#" class="hover:text-cyan-400 transition-colors">Smart Contract</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="font-bold mb-4">PULSE Ecosystem</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="https://chainpulse.info" target="_blank" class="hover:text-cyan-400 transition-colors">PULSE Token</a></li>
+                        <li><a href="https://chainpulse.info#tokenomics" target="_blank" class="hover:text-cyan-400 transition-colors">Tokenomics</a></li>
+                        <li><a href="https://chainpulse.info#roadmap" target="_blank" class="hover:text-cyan-400 transition-colors">Roadmap</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="mt-12 pt-8 border-t border-gray-800 text-center text-gray-400">
+                <p>&copy; 2025 Digital Pulse. Powered by PULSE ecosystem on Solana blockchain.</p>
+                <p class="mt-2 text-sm">Smart contract will be deployed to Solana mainnet soon. Currently in preview mode.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
+

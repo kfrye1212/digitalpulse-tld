@@ -1,0 +1,234 @@
+/* Digital Pulse TLD dApp Styles */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --cyan: #00f5ff;
+    --magenta: #ff00ff;
+    --dark-bg: #0a0a0f;
+    --card-bg: rgba(20, 20, 30, 0.8);
+    --border-color: rgba(0, 245, 255, 0.2);
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: var(--dark-bg);
+    color: #e0e0e0;
+    overflow-x: hidden;
+    line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+}
+
+/* Text Gradient */
+.text-gradient {
+    background: linear-gradient(135deg, var(--cyan) 0%, var(--magenta) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Background Gradient */
+.bg-gradient-pulse {
+    background: linear-gradient(135deg, var(--cyan) 0%, var(--magenta) 100%);
+}
+
+/* Glow Effects */
+.glow-cyan {
+    box-shadow: 0 0 20px rgba(0, 245, 255, 0.5);
+}
+
+.glow-pulse {
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(0, 245, 255, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 40px rgba(255, 0, 255, 0.8);
+    }
+}
+
+/* Card Component */
+.card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 24px;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.card:hover {
+    border-color: rgba(0, 245, 255, 0.5);
+    transform: translateY(-5px);
+}
+
+/* Buttons */
+.btn {
+    display: inline-block;
+    padding: 12px 32px;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: none;
+    font-size: 16px;
+    text-decoration: none;
+    text-align: center;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--cyan) 0%, var(--magenta) 100%);
+    color: var(--dark-bg);
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(0, 245, 255, 0.4);
+}
+
+.btn-outline {
+    background: transparent;
+    border: 2px solid var(--cyan);
+    color: var(--cyan);
+}
+
+.btn-outline:hover {
+    background: rgba(0, 245, 255, 0.1);
+}
+
+/* Navigation */
+nav {
+    background: rgba(10, 10, 15, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(0, 245, 255, 0.1);
+}
+
+/* Hero Background Grid */
+.hero-bg {
+    background-image: 
+        linear-gradient(rgba(0, 245, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 245, 255, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    position: relative;
+}
+
+.hero-bg::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 50% 50%, rgba(0, 245, 255, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+/* Domain Status Badge */
+.status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.status-available {
+    background: rgba(0, 255, 0, 0.2);
+    color: #00ff00;
+    border: 1px solid rgba(0, 255, 0, 0.5);
+}
+
+.status-taken {
+    background: rgba(255, 0, 0, 0.2);
+    color: #ff4444;
+    border: 1px solid rgba(255, 0, 0, 0.5);
+}
+
+/* Domain Card */
+.domain-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+
+.domain-card:hover {
+    border-color: var(--cyan);
+    transform: translateY(-3px);
+}
+
+/* Table Styles */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th {
+    text-align: left;
+    padding: 12px;
+    border-bottom: 2px solid var(--border-color);
+    font-weight: 600;
+    color: var(--cyan);
+}
+
+.table td {
+    padding: 12px;
+    border-bottom: 1px solid rgba(128, 128, 128, 0.1);
+}
+
+.table tr:hover {
+    background: rgba(0, 245, 255, 0.05);
+}
+
+/* Loading Spinner */
+.spinner {
+    border: 3px solid rgba(0, 245, 255, 0.1);
+    border-top: 3px solid var(--cyan);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .hero-bg {
+        padding-top: 100px;
+    }
+    
+    h1 {
+        font-size: 2.5rem !important;
+    }
+    
+    .card {
+        padding: 16px;
+    }
+}
+
+/* Utility Classes */
+.hidden {
+    display: none !important;
+}
+
+.container {
+    max-width: 1200px;
+}
+

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketplace - Digital Pulse</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-pulse flex items-center justify-center">
+                        <span class="text-black font-bold text-xl">DP</span>
+                    </div>
+                    <span class="text-2xl font-bold text-gradient">Digital Pulse</span>
+                </div>
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="index.html" class="hover:text-cyan-400 transition-colors">Search</a>
+                    <a href="my-domains.html" class="hover:text-cyan-400 transition-colors">My Domains</a>
+                    <a href="marketplace.html" class="text-cyan-400">Marketplace</a>
+                    <a href="https://chainpulse.info" target="_blank" class="hover:text-cyan-400 transition-colors">About PULSE</a>
+                    <button id="connectWallet" class="btn btn-primary glow-cyan">Connect Wallet</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <section class="pt-32 pb-20 min-h-screen hero-bg">
+        <div class="container mx-auto px-4">
+            <div class="mb-12">
+                <h1 class="text-4xl md:text-5xl font-bold mb-4">
+                    Domain <span class="text-gradient">Marketplace</span>
+                </h1>
+                <p class="text-xl text-gray-400">
+                    Buy and sell premium Web3 domains
+                </p>
+            </div>
+            
+            <!-- Filters -->
+            <div class="card mb-8">
+                <div class="grid md:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2">TLD</label>
+                        <select class="w-full px-4 py-2 bg-gray-900 border border-cyan-500/30 rounded-lg text-white focus:outline-none focus:border-cyan-500">
+                            <option value="">All TLDs</option>
+                            <option value=".pulse">.pulse</option>
+                            <option value=".verse">.verse</option>
+                            <option value=".cp">.cp</option>
+                            <option value=".pv">.pv</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2">Sort By</label>
+                        <select class="w-full px-4 py-2 bg-gray-900 border border-cyan-500/30 rounded-lg text-white focus:outline-none focus:border-cyan-500">
+                            <option value="recent">Recently Listed</option>
+                            <option value="price-low">Price: Low to High</option>
+                            <option value="price-high">Price: High to Low</option>
+                            <option value="popular">Most Popular</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2">Min Price (SOL)</label>
+                        <input type="number" placeholder="0" class="w-full px-4 py-2 bg-gray-900 border border-cyan-500/30 rounded-lg text-white focus:outline-none focus:border-cyan-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2">Max Price (SOL)</label>
+                        <input type="number" placeholder="100" class="w-full px-4 py-2 bg-gray-900 border border-cyan-500/30 rounded-lg text-white focus:outline-none focus:border-cyan-500">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Marketplace Stats -->
+            <div class="grid md:grid-cols-4 gap-6 mb-12">
+                <div class="card">
+                    <p class="text-gray-400 mb-2">Total Volume</p>
+                    <p class="text-3xl font-bold text-gradient">127.5 SOL</p>
+                </div>
+                <div class="card">
+                    <p class="text-gray-400 mb-2">Listings</p>
+                    <p class="text-3xl font-bold text-gradient">24</p>
+                </div>
+                <div class="card">
+                    <p class="text-gray-400 mb-2">Floor Price</p>
+                    <p class="text-3xl font-bold text-gradient">0.5 SOL</p>
+                </div>
+                <div class="card">
+                    <p class="text-gray-400 mb-2">Sales (24h)</p>
+                    <p class="text-3xl font-bold text-gradient">8</p>
+                </div>
+            </div>
+            
+            <!-- Listings Grid -->
+            <div class="grid md:grid-cols-3 gap-6" id="listingsGrid">
+                <!-- Populated by JavaScript -->
+            </div>
+            
+            <!-- Empty State -->
+            <div id="emptyState" class="hidden text-center py-20">
+                <div class="text-6xl mb-6">🏪</div>
+                <h2 class="text-3xl font-bold mb-4">No Listings Found</h2>
+                <p class="text-gray-400 mb-8">
+                    Try adjusting your filters or check back later
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Purchase Modal -->
+    <div id="purchaseModal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+        <div class="card max-w-md w-full">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-bold" id="purchaseDomain"></h3>
+                <button onclick="closePurchaseModal()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+            </div>
+            
+            <div class="space-y-4 mb-6">
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Price</span>
+                    <span class="font-bold text-gradient" id="purchasePrice"></span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Royalty (5%)</span>
+                    <span class="font-bold" id="purchaseRoyalty"></span>
+                </div>
+                <div class="flex justify-between border-t border-gray-700 pt-4">
+                    <span class="text-gray-400">Total</span>
+                    <span class="font-bold text-gradient text-xl" id="purchaseTotal"></span>
+                </div>
+            </div>
+            
+            <div class="space-y-3">
+                <button class="btn btn-primary w-full py-3" onclick="completePurchase()">
+                    Buy Now
+                </button>
+                <button class="btn btn-outline w-full py-3" onclick="closePurchaseModal()">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-black/50 border-t border-cyan-500/20 py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-8 h-8 rounded-full bg-gradient-pulse flex items-center justify-center">
+                            <span class="text-black font-bold">DP</span>
+                        </div>
+                        <span class="text-xl font-bold text-gradient">Digital Pulse</span>
+                    </div>
+                    <p class="text-gray-400">
+                        Web3 domain registration on Solana blockchain
+                    </p>
+                </div>
+                
+                <div>
+                    <h3 class="font-bold mb-4">Platform</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="index.html" class="hover:text-cyan-400 transition-colors">Search Domains</a></li>
+                        <li><a href="my-domains.html" class="hover:text-cyan-400 transition-colors">My Domains</a></li>
+                        <li><a href="marketplace.html" class="hover:text-cyan-400 transition-colors">Marketplace</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="font-bold mb-4">Resources</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-cyan-400 transition-colors">Documentation</a></li>
+                        <li><a href="#" class="hover:text-cyan-400 transition-colors">API</a></li>
+                        <li><a href="#" class="hover:text-cyan-400 transition-colors">Smart Contract</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="font-bold mb-4">PULSE Ecosystem</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="https://chainpulse.info" target="_blank" class="hover:text-cyan-400 transition-colors">PULSE Token</a></li>
+                        <li><a href="https://chainpulse.info#tokenomics" target="_blank" class="hover:text-cyan-400 transition-colors">Tokenomics</a></li>
+                        <li><a href="https://chainpulse.info#roadmap" target="_blank" class="hover:text-cyan-400 transition-colors">Roadmap</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="mt-12 pt-8 border-t border-gray-800 text-center text-gray-400">
+                <p>&copy; 2025 Digital Pulse. Powered by PULSE ecosystem on Solana blockchain.</p>
+                <p class="mt-2 text-sm">Smart contract will be deployed to Solana mainnet soon. Currently in preview mode.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+    <script src="marketplace.js"></script>
+</body>
+</html>
+

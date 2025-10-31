@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Domains - Digital Pulse</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-pulse flex items-center justify-center">
+                        <span class="text-black font-bold text-xl">DP</span>
+                    </div>
+                    <span class="text-2xl font-bold text-gradient">Digital Pulse</span>
+                </div>
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="index.html" class="hover:text-cyan-400 transition-colors">Search</a>
+                    <a href="my-domains.html" class="text-cyan-400">My Domains</a>
+                    <a href="marketplace.html" class="hover:text-cyan-400 transition-colors">Marketplace</a>
+                    <a href="https://chainpulse.info" target="_blank" class="hover:text-cyan-400 transition-colors">About PULSE</a>
+                    <button id="connectWallet" class="btn btn-primary glow-cyan">Connect Wallet</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <section class="pt-32 pb-20 min-h-screen hero-bg">
+        <div class="container mx-auto px-4">
+            <div class="mb-12">
+                <h1 class="text-4xl md:text-5xl font-bold mb-4">
+                    My <span class="text-gradient">Domains</span>
+                </h1>
+                <p class="text-xl text-gray-400">
+                    Manage your Web3 domain portfolio
+                </p>
+            </div>
+            
+            <!-- Wallet Not Connected State -->
+            <div id="notConnected" class="max-w-2xl mx-auto text-center py-20">
+                <div class="card">
+                    <div class="text-6xl mb-6">🔒</div>
+                    <h2 class="text-3xl font-bold mb-4">Connect Your Wallet</h2>
+                    <p class="text-gray-400 mb-8">
+                        Please connect your Phantom wallet to view your domains
+                    </p>
+                    <button onclick="document.getElementById('connectWallet').click()" class="btn btn-primary px-8 py-4 text-lg">
+                        Connect Wallet
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Domains List (shown when wallet connected) -->
+            <div id="domainsList" class="hidden">
+                <!-- Stats Cards -->
+                <div class="grid md:grid-cols-3 gap-6 mb-12">
+                    <div class="card">
+                        <p class="text-gray-400 mb-2">Total Domains</p>
+                        <p class="text-4xl font-bold text-gradient" id="totalDomains">0</p>
+                    </div>
+                    <div class="card">
+                        <p class="text-gray-400 mb-2">Portfolio Value</p>
+                        <p class="text-4xl font-bold text-gradient" id="portfolioValue">0 SOL</p>
+                    </div>
+                    <div class="card">
+                        <p class="text-gray-400 mb-2">Expiring Soon</p>
+                        <p class="text-4xl font-bold text-gradient" id="expiringSoon">0</p>
+                    </div>
+                </div>
+                
+                <!-- Domains Table -->
+                <div class="card">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-2xl font-bold">Your Domains</h2>
+                        <a href="index.html" class="btn btn-primary">Register New Domain</a>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Domain</th>
+                                    <th>Registered</th>
+                                    <th>Expires</th>
+                                    <th>Value</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="domainsTableBody">
+                                <!-- Populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Empty State -->
+                <div id="emptyState" class="hidden text-center py-20">
+                    <div class="text-6xl mb-6">🌐</div>
+                    <h2 class="text-3xl font-bold mb-4">No Domains Yet</h2>
+                    <p class="text-gray-400 mb-8">
+                        Start building your Web3 identity by registering your first domain
+                    </p>
+                    <a href="index.html" class="btn btn-primary px-8 py-4 text-lg">
+                        Search Domains
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Domain Actions Modal (hidden by default) -->
+    <div id="actionsModal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+        <div class="card max-w-md w-full">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-bold" id="modalDomain"></h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+            </div>
+            
+            <div class="space-y-4">
+                <button class="btn btn-primary w-full py-3" onclick="renewDomain()">
+                    Renew (0.15 SOL)
+                </button>
+                <button class="btn btn-outline w-full py-3" onclick="transferDomain()">
+                    Transfer
+                </button>
+                <button class="btn btn-outline w-full py-3" onclick="listForSale()">
+                    List for Sale
+                </button>
+                <button class="btn btn-outline w-full py-3 text-red-400 border-red-400 hover:bg-red-400/10" onclick="deleteDomain()">
+                    Delete Domain
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-black/50 border-t border-cyan-500/20 py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-8 h-8 rounded-full bg-gradient-pulse flex items-center justify-center">
+                            <span class="text-black font-bold">DP</span>
+                        </div>
+                        <span class="text-xl font-bold text-gradient">Digital Pulse</span>
+                    </div>
+                    <p class="text-gray-400">
+                        Web3 domain registration on Solana blockchain
+                    </p>
+                </div>
+                
+                <div>
+                    <h3 class="font-bold mb-4">Platform</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="index.html" class="hover:text-cyan-400 transition-colors">Search Domains</a></li>
+                        <li><a href="my-domains.html" class="hover:text-cyan-400 transition-colors">My Domains</a></li>
+                        <li><a href="marketplace.html" class="hover:text-cyan-400 transition-colors">Marketplace</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="font-bold mb-4">Resources</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-cyan-400 transition-colors">Documentation</a></li>
+                        <li><a href="#" class="hover:text-cyan-400 transition-colors">API</a></li>
+                        <li><a href="#" class="hover:text-cyan-400 transition-colors">Smart Contract</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="font-bold mb-4">PULSE Ecosystem</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="https://chainpulse.info" target="_blank" class="hover:text-cyan-400 transition-colors">PULSE Token</a></li>
+                        <li><a href="https://chainpulse.info#tokenomics" target="_blank" class="hover:text-cyan-400 transition-colors">Tokenomics</a></li>
+                        <li><a href="https://chainpulse.info#roadmap" target="_blank" class="hover:text-cyan-400 transition-colors">Roadmap</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="mt-12 pt-8 border-t border-gray-800 text-center text-gray-400">
+                <p>&copy; 2025 Digital Pulse. Powered by PULSE ecosystem on Solana blockchain.</p>
+                <p class="mt-2 text-sm">Smart contract will be deployed to Solana mainnet soon. Currently in preview mode.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+    <script src="my-domains.js"></script>
+</body>
+</html>
+
