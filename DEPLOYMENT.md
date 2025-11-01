@@ -5,7 +5,7 @@ This document provides step-by-step instructions for deploying the Digital Pulse
 ## Prerequisites
 
 - GitHub account with repository access
-- Domain name (e.g., chainpulse.network) with DNS management access
+- Domain name (e.g., www.chainpulse.info) with DNS management access
 - Basic understanding of DNS configuration
 
 ## Setup Instructions
@@ -32,39 +32,16 @@ This document provides step-by-step instructions for deploying the Digital Pulse
 #### In GitHub:
 
 1. Go to **Settings** → **Pages**
-2. Under "Custom domain", enter: `chainpulse.network`
+2. Under "Custom domain", enter: `www.chainpulse.info`
 3. Click **Save**
 4. Wait for DNS check to complete (green checkmark)
 5. Once verified, check "Enforce HTTPS" (recommended)
 
 #### In Your DNS Provider (GoDaddy, Cloudflare, etc.):
 
-**Option A: Using Apex Domain (recommended)**
-Add these A records:
+**Using www Subdomain (Recommended for this setup):**
+Add a CNAME record:
 
-```
-Type: A
-Name: @ (or leave blank for root domain)
-Value: 185.199.108.153
-TTL: 600
-
-Type: A
-Name: @
-Value: 185.199.109.153
-TTL: 600
-
-Type: A
-Name: @
-Value: 185.199.110.153
-TTL: 600
-
-Type: A
-Name: @
-Value: 185.199.111.153
-TTL: 600
-```
-
-Add a CNAME for www:
 ```
 Type: CNAME
 Name: www
@@ -72,21 +49,19 @@ Value: kfrye1212.github.io
 TTL: 600
 ```
 
-**Option B: Using www Subdomain Only**
+**Optional: Redirect apex domain to www**
+If you want chainpulse.info to redirect to www.chainpulse.info:
 ```
-Type: CNAME
-Name: www
-Value: kfrye1212.github.io
-TTL: 600
+Type: URL Redirect (or ALIAS/ANAME if supported)
+Name: @ (or chainpulse.info)
+Target: https://www.chainpulse.info
 ```
-
-Then set up a redirect from apex to www in your DNS provider.
 
 ### Step 4: Verify DNS Configuration
 
 1. Wait 5-30 minutes for DNS propagation
 2. Check DNS propagation at: https://www.whatsmydns.net/
-3. Test your domain: https://chainpulse.network
+3. Test your domain: https://www.chainpulse.info
 4. Verify HTTPS is working
 
 ## Troubleshooting

@@ -17,7 +17,7 @@ This checklist helps verify that the GitHub Pages and custom domain setup is com
 ## Configuration Validation ✓
 
 - [x] Workflow YAML syntax is valid
-- [x] CNAME file contains only domain name (chainpulse.network)
+- [x] CNAME file contains only domain name (www.chainpulse.info)
 - [x] All HTML files use relative paths
 - [x] CSS and JS files load correctly
 - [x] Navigation links work across pages
@@ -40,23 +40,23 @@ This checklist helps verify that the GitHub Pages and custom domain setup is com
 - [ ] Check that CSS and JS are loading
 
 ### Step 4: Configure DNS (At Domain Provider)
-- [ ] Add A records for GitHub Pages IPs:
-  - 185.199.108.153
-  - 185.199.109.153
-  - 185.199.110.153
-  - 185.199.111.153
-- [ ] Add CNAME record for www subdomain
+- [ ] Add CNAME record for www subdomain:
+  - Type: CNAME
+  - Name: www
+  - Value: kfrye1212.github.io
+  - TTL: 600
+- [ ] Optional: Set up redirect from apex domain (chainpulse.info) to www.chainpulse.info
 - [ ] Wait 5-30 minutes for propagation
 
 ### Step 5: Enable Custom Domain
 - [ ] Go to Settings → Pages → Custom domain
-- [ ] Enter: chainpulse.network
+- [ ] Enter: www.chainpulse.info
 - [ ] Click Save
 - [ ] Wait for DNS check (green checkmark)
 - [ ] Enable "Enforce HTTPS"
 
 ### Step 6: Final Verification
-- [ ] Visit https://chainpulse.network
+- [ ] Visit https://www.chainpulse.info
 - [ ] Verify HTTPS is working
 - [ ] Test all pages on custom domain
 - [ ] Check DNS propagation at whatsmydns.net

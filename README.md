@@ -41,39 +41,29 @@ This repository is configured with GitHub Actions for automatic deployment to Gi
    - Source: Select "GitHub Actions"
 3. Your site will be live at `https://kfrye1212.github.io/digitalpulse-tld/`
 
-**Custom Domain Setup (chainpulse.network):**
+**Custom Domain Setup (www.chainpulse.info):**
 
-The repository includes a `CNAME` file configured for `chainpulse.network`.
+The repository includes a `CNAME` file configured for `www.chainpulse.info`.
 
 To activate the custom domain:
 1. In your GitHub repository: Settings → Pages → Custom domain
-2. Enter: `chainpulse.network`
+2. Enter: `www.chainpulse.info`
 3. Click "Save"
 4. Wait for DNS check to complete
 
 **DNS Configuration at your domain provider:**
 ```
-Type: A Records (for apex domain)
-Name: @
-Values: 
-  185.199.108.153
-  185.199.109.153
-  185.199.110.153
-  185.199.111.153
-TTL: 600
-
 Type: CNAME (for www subdomain)
 Name: www
 Value: kfrye1212.github.io
 TTL: 600
 ```
 
-**Alternative: Use www subdomain only**
+**Optional: Redirect apex domain to www**
 ```
-Type: CNAME
-Name: @
-Value: kfrye1212.github.io
-TTL: 600
+Type: URL Redirect (or ALIAS/ANAME if supported)
+Name: @ (or chainpulse.info)
+Target: https://www.chainpulse.info
 ```
 
 ### Option 2: Vercel (Alternative)
