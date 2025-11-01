@@ -542,3 +542,295 @@ h1, h2, h3, h4, h5, h6 {
     background: linear-gradient(135deg, var(--cyan-dark) 0%, var(--magenta-dark) 100%);
 }
 
+
+
+/* My Domains Page Styles */
+.page-title {
+    font-size: 48px;
+    font-weight: 900;
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+.page-description {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 18px;
+    margin-bottom: 48px;
+}
+
+.nav-link.active {
+    color: var(--cyan);
+    position: relative;
+}
+
+.nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(135deg, var(--cyan) 0%, var(--magenta) 100%);
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 24px;
+    margin-bottom: 48px;
+}
+
+.stat-card {
+    background: rgba(26, 26, 31, 0.6);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 48px;
+    font-weight: 900;
+    font-family: 'Orbitron', sans-serif;
+    background: linear-gradient(135deg, var(--cyan) 0%, var(--magenta) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+}
+
+.stat-label {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Domains Grid */
+.domains-list {
+    margin-bottom: 80px;
+}
+
+.domains-grid {
+    display: grid;
+    gap: 24px;
+}
+
+.domain-card {
+    background: rgba(26, 26, 31, 0.6);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+}
+
+.domain-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.domain-name-large {
+    font-size: 32px;
+    font-weight: 900;
+    font-family: 'Orbitron', sans-serif;
+}
+
+.badge-listed {
+    background: rgba(0, 240, 255, 0.2);
+    border: 1px solid var(--cyan);
+    color: var(--cyan);
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.badge-expiring {
+    background: rgba(255, 165, 0, 0.2);
+    border: 1px solid #ffa500;
+    color: #ffa500;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.domain-card-info {
+    margin-bottom: 24px;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(0, 240, 255, 0.1);
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
+}
+
+.info-value {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.info-value.mono {
+    font-family: monospace;
+    font-size: 12px;
+}
+
+.text-warning {
+    color: #ffa500;
+}
+
+.domain-card-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.domain-card-actions button {
+    flex: 1;
+    min-width: 140px;
+}
+
+/* Marketplace Page Styles */
+.filter-section {
+    margin-bottom: 32px;
+}
+
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.filter-group label {
+    display: block;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.filter-group select {
+    width: 100%;
+    background: rgba(26, 26, 31, 0.8);
+    border: 2px solid rgba(0, 240, 255, 0.3);
+    border-radius: 8px;
+    padding: 12px;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+}
+
+.filter-group select:focus {
+    outline: none;
+    border-color: var(--cyan);
+}
+
+.listing-card {
+    background: rgba(26, 26, 31, 0.6);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.listing-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+}
+
+.listing-domain {
+    font-size: 28px;
+    font-weight: 900;
+    font-family: 'Orbitron', sans-serif;
+}
+
+.listing-price {
+    text-align: right;
+}
+
+.listing-price-value {
+    font-size: 32px;
+    font-weight: 900;
+    font-family: 'Orbitron', sans-serif;
+    background: linear-gradient(135deg, var(--cyan) 0%, var(--magenta) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.listing-price-label {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.listing-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+}
+
+.listing-info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.listing-info-label {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.listing-info-value {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.listing-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.listing-actions button {
+    flex: 1;
+}
+
+/* Responsive Updates */
+@media (max-width: 768px) {
+    .domain-card-actions {
+        flex-direction: column;
+    }
+    
+    .domain-card-actions button {
+        width: 100%;
+    }
+    
+    .listing-header {
+        flex-direction: column;
+        gap: 16px;
+    }
+    
+    .listing-price {
+        text-align: left;
+    }
+}
+

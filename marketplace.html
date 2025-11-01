@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketplace - Digital Pulse TLD</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="container nav-container">
+            <a href="/" class="logo">
+                <span class="logo-text">DIGITAL PULSE</span>
+            </a>
+            
+            <div class="nav-links">
+                <a href="/" class="nav-link">Search</a>
+                <a href="/my-domains.html" class="nav-link">My Domains</a>
+                <a href="/marketplace.html" class="nav-link active">Marketplace</a>
+            </div>
+            
+            <div id="wallet-button-container"></div>
+        </div>
+    </nav>
+
+    <!-- Gradient Backgrounds -->
+    <div class="gradient-bg" style="top: -200px; right: -200px;"></div>
+    <div class="gradient-bg-2" style="bottom: -150px; left: -150px;"></div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <h1 class="page-title text-gradient">Marketplace</h1>
+            <p class="page-description">Buy and sell domains with 5% marketplace fee</p>
+
+            <!-- Filters -->
+            <div class="filter-section card-glass">
+                <h3 class="section-title">Filters</h3>
+                <div class="filter-grid">
+                    <div class="filter-group">
+                        <label>TLD</label>
+                        <select id="filter-tld" onchange="applyFilters()">
+                            <option value="all">All TLDs</option>
+                            <option value=".pulse">.pulse</option>
+                            <option value=".verse">.verse</option>
+                            <option value=".cp">.cp</option>
+                            <option value=".pv">.pv</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Price Range</label>
+                        <select id="filter-price" onchange="applyFilters()">
+                            <option value="all">All Prices</option>
+                            <option value="0-1">0 - 1 SOL</option>
+                            <option value="1-5">1 - 5 SOL</option>
+                            <option value="5-10">5 - 10 SOL</option>
+                            <option value="10+">10+ SOL</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Sort By</label>
+                        <select id="filter-sort" onchange="applyFilters()">
+                            <option value="newest">Newest Listed</option>
+                            <option value="price-low">Price: Low to High</option>
+                            <option value="price-high">Price: High to Low</option>
+                            <option value="name">Name: A-Z</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Listings Grid -->
+            <div class="domains-list">
+                <h3 class="section-title">Available Domains</h3>
+                <div id="listings-container" class="domains-grid">
+                    <!-- Loading state -->
+                    <div class="card-glass" style="text-align: center; padding: 60px 32px;">
+                        <p style="color: rgba(255, 255, 255, 0.6);">Loading marketplace...</p>
+                    </div>
+                </div>
+                
+                <!-- Empty State -->
+                <div id="empty-marketplace" class="card-glass" style="text-align: center; padding: 60px 32px; display: none;">
+                    <div style="font-size: 64px; margin-bottom: 16px;">🛒</div>
+                    <h3 class="section-title">No Listings Found</h3>
+                    <p style="color: rgba(255, 255, 255, 0.6); margin-bottom: 24px;">
+                        No domains match your filters. Try adjusting your search criteria.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-content">
+            <div class="footer-section">
+                <h3 class="footer-title">DIGITAL PULSE</h3>
+                <p class="footer-text">Next-generation decentralized domain registration on Solana blockchain</p>
+            </div>
+            
+            <div class="footer-section">
+                <h4 class="footer-heading">Marketplace</h4>
+                <ul class="footer-list">
+                    <li>5% Marketplace Fee</li>
+                    <li>Instant Transfers</li>
+                    <li>Secure Transactions</li>
+                    <li>NFT-Based Ownership</li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h4 class="footer-heading">Features</h4>
+                <ul class="footer-list">
+                    <li>Buy Domains</li>
+                    <li>Sell Domains</li>
+                    <li>Transfer Ownership</li>
+                    <li>Price Discovery</li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h4 class="footer-heading">Network</h4>
+                <ul class="footer-list">
+                    <li>Solana Mainnet</li>
+                    <li>Fast & Secure</li>
+                    <li>Low Fees</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>© 2025 Digital Pulse. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="https://chainpulse.info" target="_blank">chainpulse.info</a>
+                <a href="https://chainpulse.network" target="_blank">chainpulse.network</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+    <script src="app.js"></script>
+    <script src="marketplace.js"></script>
+</body>
+</html>
+

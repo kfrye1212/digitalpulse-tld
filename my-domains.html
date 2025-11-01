@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Domains - Digital Pulse TLD</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="container nav-container">
+            <a href="/" class="logo">
+                <span class="logo-text">DIGITAL PULSE</span>
+            </a>
+            
+            <div class="nav-links">
+                <a href="/" class="nav-link">Search</a>
+                <a href="/my-domains.html" class="nav-link active">My Domains</a>
+                <a href="/marketplace.html" class="nav-link">Marketplace</a>
+            </div>
+            
+            <div id="wallet-button-container"></div>
+        </div>
+    </nav>
+
+    <!-- Gradient Backgrounds -->
+    <div class="gradient-bg" style="top: -200px; right: -200px;"></div>
+    <div class="gradient-bg-2" style="bottom: -150px; left: -150px;"></div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <h1 class="page-title text-gradient">My Domains</h1>
+            <p class="page-description">Manage your registered domains, renew subscriptions, and list for sale</p>
+
+            <!-- Connect Wallet Prompt -->
+            <div id="connect-prompt" class="card-glass" style="text-align: center; padding: 60px 32px; margin-bottom: 40px;">
+                <h3 class="section-title">Connect Your Wallet</h3>
+                <p style="color: rgba(255, 255, 255, 0.6); margin-bottom: 24px;">
+                    Connect your Phantom wallet to view and manage your domains
+                </p>
+                <button onclick="connectWallet()" class="btn-primary">Connect Wallet</button>
+            </div>
+
+            <!-- Domains Grid (hidden until wallet connected) -->
+            <div id="domains-section" style="display: none;">
+                <!-- Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="total-domains">0</div>
+                        <div class="stat-label">Total Domains</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="active-domains">0</div>
+                        <div class="stat-label">Active</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="expiring-soon">0</div>
+                        <div class="stat-label">Expiring Soon</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="listed-domains">0</div>
+                        <div class="stat-label">Listed for Sale</div>
+                    </div>
+                </div>
+
+                <!-- Domains List -->
+                <div class="domains-list">
+                    <h3 class="section-title">Your Domains</h3>
+                    <div id="domains-container" class="domains-grid"></div>
+                    
+                    <!-- Empty State -->
+                    <div id="empty-state" class="card-glass" style="text-align: center; padding: 60px 32px; display: none;">
+                        <div style="font-size: 64px; margin-bottom: 16px;">🔍</div>
+                        <h3 class="section-title">No Domains Yet</h3>
+                        <p style="color: rgba(255, 255, 255, 0.6); margin-bottom: 24px;">
+                            Start building your Web3 identity by registering your first domain
+                        </p>
+                        <a href="/" class="btn-primary">Search Domains</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-content">
+            <div class="footer-section">
+                <h3 class="footer-title">DIGITAL PULSE</h3>
+                <p class="footer-text">Next-generation decentralized domain registration on Solana blockchain</p>
+            </div>
+            
+            <div class="footer-section">
+                <h4 class="footer-heading">Pricing</h4>
+                <ul class="footer-list">
+                    <li>Registration: 0.25 SOL</li>
+                    <li>Renewal: 0.15 SOL</li>
+                    <li>Marketplace Fee: 5%</li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h4 class="footer-heading">Features</h4>
+                <ul class="footer-list">
+                    <li>NFT Ownership</li>
+                    <li>Instant Registration</li>
+                    <li>Integrated Marketplace</li>
+                    <li>Domain Management</li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h4 class="footer-heading">Network</h4>
+                <ul class="footer-list">
+                    <li>Solana Mainnet</li>
+                    <li>Secure & Fast</li>
+                    <li>Low Fees</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>© 2025 Digital Pulse. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="https://chainpulse.info" target="_blank">chainpulse.info</a>
+                <a href="https://chainpulse.network" target="_blank">chainpulse.network</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+    <script src="app.js"></script>
+    <script src="my-domains.js"></script>
+</body>
+</html>
+
