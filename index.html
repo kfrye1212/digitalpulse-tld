@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Pulse TLD - Decentralized Domain Registration</title>
+    <meta name="description" content="Register and manage .pulse, .verse, .cp, and .pv domains on Solana blockchain">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Solana Wallet Adapter CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/@solana/wallet-adapter-react-ui@0.9.35/styles.css">
+    
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="container nav-container">
+            <a href="/" class="logo">
+                <span class="logo-text">DIGITAL PULSE</span>
+            </a>
+            
+            <div class="nav-links">
+                <a href="/" class="nav-link">Search</a>
+                <a href="/my-domains.html" class="nav-link">My Domains</a>
+                <a href="/marketplace.html" class="nav-link">Marketplace</a>
+            </div>
+            
+            <div id="wallet-button-container"></div>
+        </div>
+    </nav>
+
+    <!-- Gradient Backgrounds -->
+    <div class="gradient-bg" style="top: -200px; right: -200px;"></div>
+    <div class="gradient-bg-2" style="bottom: -150px; left: -150px;"></div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Hero Section -->
+            <div class="hero">
+                <h1 class="hero-title glow-cyan">
+                    <span class="text-primary">DIGITAL PULSE</span>
+                </h1>
+                <h2 class="hero-subtitle text-gradient">
+                    TLD Domain Registration
+                </h2>
+                <p class="hero-description">
+                    Register your Web3 identity on Solana blockchain. Own .pulse, .verse, .cp, or .pv domains as NFTs.
+                </p>
+                
+                <!-- Key Metrics -->
+                <div class="metrics">
+                    <div class="metric-card">
+                        <span class="metric-value">4</span>
+                        <span class="metric-label">TLD Options</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-value">0.25</span>
+                        <span class="metric-label">SOL Price</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-value">Instant</span>
+                        <span class="metric-label">Registration</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Interface -->
+            <div class="search-section">
+                <div class="card-glass search-card">
+                    <h3 class="section-title">Search Domain</h3>
+                    
+                    <!-- TLD Selector -->
+                    <div class="tld-selector">
+                        <button class="tld-btn active" data-tld="all">All TLDs</button>
+                        <button class="tld-btn" data-tld=".pulse">.pulse</button>
+                        <button class="tld-btn" data-tld=".verse">.verse</button>
+                        <button class="tld-btn" data-tld=".cp">.cp</button>
+                        <button class="tld-btn" data-tld=".pv">.pv</button>
+                    </div>
+                    
+                    <!-- Search Input -->
+                    <div class="search-input-group">
+                        <input type="text" id="domain-search" class="input-cyber" placeholder="Enter domain name...">
+                        <button id="search-btn" class="btn-primary">Search</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Results -->
+            <div id="search-results" class="search-results" style="display: none;">
+                <h3 class="section-title">Search Results</h3>
+                <div id="results-container" class="results-grid"></div>
+            </div>
+
+            <!-- Features Section -->
+            <div class="features">
+                <div class="feature-card">
+                    <div class="feature-icon">🔍</div>
+                    <h4 class="feature-title">Search Domains</h4>
+                    <p class="feature-description">Find your perfect Web3 identity</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💎</div>
+                    <h4 class="feature-title">NFT Ownership</h4>
+                    <p class="feature-description">Domains as tradeable NFTs</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🛒</div>
+                    <h4 class="feature-title">Marketplace</h4>
+                    <p class="feature-description">Buy and sell domains</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h4 class="feature-title">Instant</h4>
+                    <p class="feature-description">Register in seconds</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-content">
+            <div class="footer-section">
+                <h3 class="footer-title">DIGITAL PULSE</h3>
+                <p class="footer-text">Next-generation decentralized domain registration on Solana blockchain</p>
+            </div>
+            
+            <div class="footer-section">
+                <h4 class="footer-heading">TLD Options</h4>
+                <ul class="footer-list">
+                    <li>.pulse domains</li>
+                    <li>.verse domains</li>
+                    <li>.cp domains</li>
+                    <li>.pv domains</li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h4 class="footer-heading">Features</h4>
+                <ul class="footer-list">
+                    <li>Instant Registration</li>
+                    <li>NFT Ownership</li>
+                    <li>Integrated Marketplace</li>
+                    <li>Domain Management</li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h4 class="footer-heading">Network</h4>
+                <ul class="footer-list">
+                    <li>Solana Mainnet</li>
+                    <li>0.25 SOL Registration</li>
+                    <li>0.15 SOL Renewal</li>
+                    <li>5% Marketplace Fee</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>© 2025 Digital Pulse. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="https://chainpulse.info" target="_blank">chainpulse.info</a>
+                <a href="https://chainpulse.network" target="_blank">chainpulse.network</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
+
