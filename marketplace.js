@@ -1,5 +1,4 @@
 // Marketplace Page Logic
-const MARKETPLACE_FEE_PERCENT = 5; // 5%
 
 let allListings = [];
 let filteredListings = [];
@@ -21,7 +20,7 @@ async function fetchMarketplaceListings() {
     // This is demo data for now
     
     // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 800));
+    await simulateDelay();
     
     // Demo listings (replace with actual blockchain query)
     const demoListings = [
@@ -76,52 +75,51 @@ async function fetchMarketplaceListings() {
 }
 
 function applyFilters() {
-    const tldFilter = document.getElementById('filter-tld').value;
-    const priceFilter = document.getElementById('filter-price').value;
-    const sortFilter = document.getElementById('filter-sort').value;
+    const tldFilter = DOMCache.get('#filter-tld').value;
+    const priceFilter = DOMCache.get('#filter-price').value;
+    const sortFilter = DOMCache.get('#filter-sort').value;
     
-    // Filter by TLD
+    // Optimized: Single pass filter instead of multiple array iterations
     filteredListings = allListings.filter(listing => {
-        if (tldFilter === 'all') return true;
-        return listing.tld === tldFilter;
-    });
-    
-    // Filter by Price
-    filteredListings = filteredListings.filter(listing => {
-        if (priceFilter === 'all') return true;
+        // Filter by TLD
+        if (tldFilter !== 'all' && listing.tld !== tldFilter) {
+            return false;
+        }
         
-        const price = listing.price;
-        if (priceFilter === '0-1') return price >= 0 && price <= 1;
-        if (priceFilter === '1-5') return price > 1 && price <= 5;
-        if (priceFilter === '5-10') return price > 5 && price <= 10;
-        if (priceFilter === '10+') return price > 10;
+        // Filter by Price range
+        if (priceFilter !== 'all') {
+            const price = listing.price;
+            if (priceFilter === '0-1' && (price < 0 || price > 1)) return false;
+            if (priceFilter === '1-5' && (price <= 1 || price > 5)) return false;
+            if (priceFilter === '5-10' && (price <= 5 || price > 10)) return false;
+            if (priceFilter === '10+' && price <= 10) return false;
+        }
         
         return true;
     });
     
     // Sort
     filteredListings.sort((a, b) => {
-        if (sortFilter === 'newest') {
-            return b.listedDate - a.listedDate;
+        switch (sortFilter) {
+            case 'newest':
+                return b.listedDate - a.listedDate;
+            case 'price-low':
+                return a.price - b.price;
+            case 'price-high':
+                return b.price - a.price;
+            case 'name':
+                return a.name.localeCompare(b.name);
+            default:
+                return 0;
         }
-        if (sortFilter === 'price-low') {
-            return a.price - b.price;
-        }
-        if (sortFilter === 'price-high') {
-            return b.price - a.price;
-        }
-        if (sortFilter === 'name') {
-            return a.name.localeCompare(b.name);
-        }
-        return 0;
     });
     
     displayListings(filteredListings);
 }
 
 function displayListings(listings) {
-    const container = document.getElementById('listings-container');
-    const emptyState = document.getElementById('empty-marketplace');
+    const container = DOMCache.get('#listings-container');
+    const emptyState = DOMCache.get('#empty-marketplace');
     
     if (listings.length === 0) {
         container.innerHTML = '';
@@ -132,18 +130,21 @@ function displayListings(listings) {
     emptyState.style.display = 'none';
     container.innerHTML = '';
     
+    // Use document fragment for better performance
+    const fragment = document.createDocumentFragment();
     listings.forEach(listing => {
         const card = createListingCard(listing);
-        container.appendChild(card);
+        fragment.appendChild(card);
     });
+    container.appendChild(fragment);
 }
 
 function createListingCard(listing) {
     const card = document.createElement('div');
     card.className = 'listing-card';
     
-    const marketplaceFee = listing.price * (MARKETPLACE_FEE_PERCENT / 100);
-    const sellerReceives = listing.price - marketplaceFee;
+    // Use utility function for fee calculation
+    const feeInfo = calculateMarketplaceFee(listing.price);
     
     card.innerHTML = `
         <div class="listing-header">
@@ -171,12 +172,12 @@ function createListingCard(listing) {
             </div>
             <div class="listing-info-item">
                 <span class="listing-info-label">Marketplace Fee</span>
-                <span class="listing-info-value">${marketplaceFee.toFixed(3)} SOL (${MARKETPLACE_FEE_PERCENT}%)</span>
+                <span class="listing-info-value">${feeInfo.fee} SOL (${feeInfo.feePercent}%)</span>
             </div>
         </div>
         
         <div class="listing-actions">
-            <button class="btn-primary" onclick='buyDomain(${JSON.stringify(listing)})'>
+            <button class="btn-primary" onclick='buyDomain(${escapeForOnClick(listing)})'>
                 Buy for ${listing.price} SOL
             </button>
             <button class="btn-secondary" onclick="viewDomainDetails('${listing.name}', '${listing.tld}')">
@@ -200,16 +201,16 @@ async function buyDomain(listing) {
         return;
     }
     
-    const marketplaceFee = listing.price * (MARKETPLACE_FEE_PERCENT / 100);
-    const sellerReceives = listing.price - marketplaceFee;
+    // Use utility function for fee calculation
+    const feeInfo = calculateMarketplaceFee(listing.price);
     
     const confirmed = confirm(
         `Buy ${listing.name}${listing.tld}?\n\n` +
         `Total Price: ${listing.price} SOL\n` +
-        `Marketplace Fee (${MARKETPLACE_FEE_PERCENT}%): ${marketplaceFee.toFixed(3)} SOL\n` +
-        `Seller Receives: ${sellerReceives.toFixed(3)} SOL\n\n` +
-        `From: ${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}\n` +
-        `To: ${listing.seller.slice(0, 4)}...${listing.seller.slice(-4)}`
+        `Marketplace Fee (${feeInfo.feePercent}%): ${feeInfo.fee} SOL\n` +
+        `Seller Receives: ${feeInfo.sellerReceives} SOL\n\n` +
+        `From: ${formatWalletAddress(walletAddress)}\n` +
+        `To: ${formatWalletAddress(listing.seller)}`
     );
     
     if (confirmed) {
@@ -225,8 +226,8 @@ async function buyDomain(listing) {
             'Smart contract integration in progress.\n\n' +
             'Transaction will:\n' +
             `- Transfer ${listing.price} SOL from your wallet\n` +
-            `- Send ${sellerReceives.toFixed(3)} SOL to seller\n` +
-            `- Send ${marketplaceFee.toFixed(3)} SOL marketplace fee\n` +
+            `- Send ${feeInfo.sellerReceives} SOL to seller\n` +
+            `- Send ${feeInfo.fee} SOL marketplace fee\n` +
             `- Transfer ${listing.name}${listing.tld} NFT to you`
         );
         
@@ -239,24 +240,18 @@ function viewDomainDetails(name, tld) {
     const listing = allListings.find(l => l.name === name && l.tld === tld);
     if (!listing) return;
     
-    const marketplaceFee = listing.price * (MARKETPLACE_FEE_PERCENT / 100);
-    const sellerReceives = listing.price - marketplaceFee;
+    // Use utility function for fee calculation
+    const feeInfo = calculateMarketplaceFee(listing.price);
     
     alert(
         `Domain Details: ${name}${tld}\n\n` +
         `Price: ${listing.price} SOL\n` +
-        `Marketplace Fee: ${marketplaceFee.toFixed(3)} SOL (${MARKETPLACE_FEE_PERCENT}%)\n` +
-        `Seller Receives: ${sellerReceives.toFixed(3)} SOL\n\n` +
+        `Marketplace Fee: ${feeInfo.fee} SOL (${feeInfo.feePercent}%)\n` +
+        `Seller Receives: ${feeInfo.sellerReceives} SOL\n\n` +
         `Seller: ${listing.seller}\n` +
         `Listed: ${formatDate(listing.listedDate)}\n` +
         `Expires: ${formatDate(listing.expiryDate)}\n` +
         `NFT Mint: ${listing.nftMint}`
     );
-}
-
-// Utility Functions
-function formatDate(date) {
-    const options = { year: 'numeric', month: 'short', day: 'numeric' };
-    return date.toLocaleDateString('en-US', options);
 }
 
