@@ -1,7 +1,8 @@
 // Shared Utilities for Digital Pulse TLD
 
-// Global wallet state management
-let walletAddress = null;
+// NOTE: walletAddress is managed globally but initialized in app.js
+// This is a reference that will be updated when wallet connects/disconnects
+// in app.js which is always loaded first
 
 // DOM Element Cache
 const DOMCache = {
@@ -15,6 +16,7 @@ const DOMCache = {
     },
     
     getAll(selector) {
+        // Note: Returns NodeList which is static. Clear cache if DOM changes significantly.
         if (!this.elements.has(selector)) {
             this.elements.set(selector, document.querySelectorAll(selector));
         }
@@ -34,7 +36,12 @@ const CONSTANTS = {
     REGISTRATION_FEE: 0.25,
     SEARCH_DEBOUNCE_MS: 300,
     API_DELAY_MS: 800,
-    EXPIRY_WARNING_DAYS: 30
+    EXPIRY_WARNING_DAYS: 30,
+    PRICE_RANGES: {
+        LOW: 1,
+        MID: 5,
+        HIGH: 10
+    }
 };
 
 // Debounce utility
@@ -103,7 +110,6 @@ function escapeForOnClick(obj) {
 // Export for use in other files
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
-        walletAddress,
         DOMCache,
         CONSTANTS,
         debounce,

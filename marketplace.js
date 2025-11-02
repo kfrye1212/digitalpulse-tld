@@ -86,13 +86,15 @@ function applyFilters() {
             return false;
         }
         
-        // Filter by Price range
+        // Filter by Price range using constants
         if (priceFilter !== 'all') {
             const price = listing.price;
-            if (priceFilter === '0-1' && (price < 0 || price > 1)) return false;
-            if (priceFilter === '1-5' && (price <= 1 || price > 5)) return false;
-            if (priceFilter === '5-10' && (price <= 5 || price > 10)) return false;
-            if (priceFilter === '10+' && price <= 10) return false;
+            const ranges = CONSTANTS.PRICE_RANGES;
+            
+            if (priceFilter === '0-1' && (price < 0 || price > ranges.LOW)) return false;
+            if (priceFilter === '1-5' && (price <= ranges.LOW || price > ranges.MID)) return false;
+            if (priceFilter === '5-10' && (price <= ranges.MID || price > ranges.HIGH)) return false;
+            if (priceFilter === '10+' && price <= ranges.HIGH) return false;
         }
         
         return true;

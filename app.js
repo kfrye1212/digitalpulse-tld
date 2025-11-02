@@ -1,5 +1,6 @@
 // TLD Options
 let selectedTLD = 'all';
+let walletAddress = null; // Wallet state managed here and shared across pages
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
