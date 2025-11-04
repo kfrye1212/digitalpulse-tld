@@ -50,12 +50,12 @@ async function performSearch() {
     // Simulate search delay
     await new Promise(resolve => setTimeout(resolve, 800));
     
-    // Generate results
+    // Generate results using blockchain simulation
     const tldsToSearch = selectedTLD === 'all' ? TLDS : [selectedTLD];
     const results = tldsToSearch.map(tld => ({
         name: query,
         tld: tld,
-        available: Math.random() > 0.3, // Random availability for demo
+        available: BlockchainSim.isDomainAvailable(query, tld),
         price: 0.25
     }));
     
@@ -114,22 +114,28 @@ function createResultCard(result) {
 }
 
 // Domain Registration
-function registerDomain(name, tld, price) {
+async function registerDomain(name, tld, price) {
     if (!walletAddress) {
         alert('Please connect your wallet first!');
         return;
     }
     
-    // TODO: Implement actual Solana transaction
     const confirmed = confirm(
         `Register ${name}${tld}?\n\n` +
         `Price: ${price} SOL\n` +
-        `Wallet: ${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}\n\n` +
-        `Smart contract integration coming soon!`
+        `Wallet: ${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}`
     );
     
     if (confirmed) {
-        alert('Registration initiated! Smart contract integration in progress.');
+        try {
+            BlockchainSim.registerDomain(name, tld, walletAddress, price);
+            alert(`Success! ${name}${tld} has been registered to your wallet.\n\nYou can view it in the "My Domains" page.`);
+            
+            // Refresh search results
+            await performSearch();
+        } catch (error) {
+            alert(`Registration failed: ${error.message}`);
+        }
     }
 }
 
