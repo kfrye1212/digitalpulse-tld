@@ -271,7 +271,8 @@ const BlockchainSim = {
                 this.registerDomain(name, tld, demoOwner, 0.25);
                 this.listDomain(name, tld, demoOwner, price);
             } catch (e) {
-                // Ignore errors during seeding
+                // Ignore errors during seeding (e.g., domain already exists)
+                console.log(`Skipping demo domain ${name}${tld}: ${e.message}`);
             }
         });
     },
