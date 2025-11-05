@@ -211,13 +211,6 @@ function handleDomainAction(e) {
     }
 }
 
-// Utility function to escape HTML
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
 function updateStats(domains) {
     const totalDomains = domains.length;
     const activeDomains = domains.filter(d => d.expiryDate > new Date()).length;
@@ -339,11 +332,5 @@ async function unlistDomain(name, tld) {
         // After successful unlisting, reload domains
         // await loadUserDomains();
     }
-}
-
-// Utility Functions
-function formatDate(date) {
-    const options = { year: 'numeric', month: 'short', day: 'numeric' };
-    return date.toLocaleDateString('en-US', options);
 }
 

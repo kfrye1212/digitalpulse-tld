@@ -13,6 +13,9 @@ const domCache = {
     filterSort: null
 };
 
+// Store listings by ID for safer data access
+const listingsById = new Map();
+
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize DOM cache
     domCache.container = document.getElementById('listings-container');
@@ -33,6 +36,13 @@ async function loadMarketplaceListings() {
     // TODO: Replace with actual smart contract call
     allListings = await fetchMarketplaceListings();
     filteredListings = [...allListings];
+    
+    // Populate listingsById map
+    listingsById.clear();
+    allListings.forEach((listing, index) => {
+        const id = `listing-${index}-${listing.name}-${listing.tld}`;
+        listingsById.set(id, listing);
+    });
     
     displayListings(filteredListings);
 }
@@ -153,11 +163,16 @@ function displayListings(listings) {
     
     domCache.emptyState.style.display = 'none';
     
+    // Clear and rebuild listingsById for current filtered set
+    listingsById.clear();
+    
     // Use DocumentFragment for better performance
     const fragment = document.createDocumentFragment();
     
-    listings.forEach(listing => {
-        const card = createListingCard(listing);
+    listings.forEach((listing, index) => {
+        const id = `listing-${index}-${listing.name}-${listing.tld}`;
+        listingsById.set(id, listing);
+        const card = createListingCard(listing, id);
         fragment.appendChild(card);
     });
     
@@ -165,7 +180,7 @@ function displayListings(listings) {
     domCache.container.appendChild(fragment);
 }
 
-function createListingCard(listing) {
+function createListingCard(listing, listingId) {
     const card = document.createElement('div');
     card.className = 'listing-card';
     
@@ -203,7 +218,7 @@ function createListingCard(listing) {
         </div>
         
         <div class="listing-actions">
-            <button class="btn-primary" data-action="buy" data-listing='${JSON.stringify(listing)}'>
+            <button class="btn-primary" data-action="buy" data-listing-id="${escapeHtml(listingId)}">
                 Buy for ${listing.price} SOL
             </button>
             <button class="btn-secondary" data-action="view" data-name="${escapeHtml(listing.name)}" data-tld="${escapeHtml(listing.tld)}">
@@ -223,19 +238,17 @@ function handleMarketplaceAction(e) {
     const action = target.dataset.action;
     
     if (action === 'buy') {
-        const listing = JSON.parse(target.dataset.listing);
-        buyDomain(listing);
+        const listingId = target.dataset.listingId;
+        const listing = listingsById.get(listingId);
+        if (listing) {
+            buyDomain(listing);
+        } else {
+            console.error('Listing not found:', listingId);
+        }
     } else if (action === 'view') {
         const { name, tld } = target.dataset;
         viewDomainDetails(name, tld);
     }
-}
-
-// Utility function to escape HTML
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
 }
 
 async function buyDomain(listing) {
@@ -304,11 +317,5 @@ function viewDomainDetails(name, tld) {
         `Expires: ${formatDate(listing.expiryDate)}\n` +
         `NFT Mint: ${listing.nftMint}`
     );
-}
-
-// Utility Functions
-function formatDate(date) {
-    const options = { year: 'numeric', month: 'short', day: 'numeric' };
-    return date.toLocaleDateString('en-US', options);
 }
 

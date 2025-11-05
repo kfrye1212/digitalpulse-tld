@@ -2,19 +2,6 @@
 const TLDS = ['.pulse', '.verse', '.cp', '.pv'];
 let selectedTLD = 'all';
 
-// Debounce utility function
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
-
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     initializeTLDSelector();
@@ -148,13 +135,6 @@ function createResultCard(result) {
     `;
     
     return card;
-}
-
-// Utility function to escape HTML and prevent XSS
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
 }
 
 // Domain Registration
