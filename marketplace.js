@@ -4,8 +4,29 @@ const MARKETPLACE_FEE_PERCENT = 5; // 5%
 let allListings = [];
 let filteredListings = [];
 
+// Cache DOM elements
+const domCache = {
+    container: null,
+    emptyState: null,
+    filterTld: null,
+    filterPrice: null,
+    filterSort: null
+};
+
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize DOM cache
+    domCache.container = document.getElementById('listings-container');
+    domCache.emptyState = document.getElementById('empty-marketplace');
+    domCache.filterTld = document.getElementById('filter-tld');
+    domCache.filterPrice = document.getElementById('filter-price');
+    domCache.filterSort = document.getElementById('filter-sort');
+    
     loadMarketplaceListings();
+    
+    // Set up event delegation for marketplace actions
+    if (domCache.container) {
+        domCache.container.addEventListener('click', handleMarketplaceAction);
+    }
 });
 
 async function loadMarketplaceListings() {
@@ -76,9 +97,11 @@ async function fetchMarketplaceListings() {
 }
 
 function applyFilters() {
-    const tldFilter = document.getElementById('filter-tld').value;
-    const priceFilter = document.getElementById('filter-price').value;
-    const sortFilter = document.getElementById('filter-sort').value;
+    if (!domCache.filterTld || !domCache.filterPrice || !domCache.filterSort) return;
+    
+    const tldFilter = domCache.filterTld.value;
+    const priceFilter = domCache.filterPrice.value;
+    const sortFilter = domCache.filterSort.value;
     
     // Filter by TLD
     filteredListings = allListings.filter(listing => {
@@ -120,22 +143,26 @@ function applyFilters() {
 }
 
 function displayListings(listings) {
-    const container = document.getElementById('listings-container');
-    const emptyState = document.getElementById('empty-marketplace');
+    if (!domCache.container || !domCache.emptyState) return;
     
     if (listings.length === 0) {
-        container.innerHTML = '';
-        emptyState.style.display = 'block';
+        domCache.container.innerHTML = '';
+        domCache.emptyState.style.display = 'block';
         return;
     }
     
-    emptyState.style.display = 'none';
-    container.innerHTML = '';
+    domCache.emptyState.style.display = 'none';
+    
+    // Use DocumentFragment for better performance
+    const fragment = document.createDocumentFragment();
     
     listings.forEach(listing => {
         const card = createListingCard(listing);
-        container.appendChild(card);
+        fragment.appendChild(card);
     });
+    
+    domCache.container.innerHTML = '';
+    domCache.container.appendChild(fragment);
 }
 
 function createListingCard(listing) {
@@ -148,7 +175,7 @@ function createListingCard(listing) {
     card.innerHTML = `
         <div class="listing-header">
             <div class="listing-domain">
-                ${listing.name}<span class="text-primary">${listing.tld}</span>
+                ${escapeHtml(listing.name)}<span class="text-primary">${escapeHtml(listing.tld)}</span>
             </div>
             <div class="listing-price">
                 <div class="listing-price-value">${listing.price} SOL</div>
@@ -159,7 +186,7 @@ function createListingCard(listing) {
         <div class="listing-info">
             <div class="listing-info-item">
                 <span class="listing-info-label">Seller</span>
-                <span class="listing-info-value mono">${listing.seller}</span>
+                <span class="listing-info-value mono">${escapeHtml(listing.seller)}</span>
             </div>
             <div class="listing-info-item">
                 <span class="listing-info-label">Listed</span>
@@ -176,10 +203,10 @@ function createListingCard(listing) {
         </div>
         
         <div class="listing-actions">
-            <button class="btn-primary" onclick='buyDomain(${JSON.stringify(listing)})'>
+            <button class="btn-primary" data-action="buy" data-listing='${JSON.stringify(listing)}'>
                 Buy for ${listing.price} SOL
             </button>
-            <button class="btn-secondary" onclick="viewDomainDetails('${listing.name}', '${listing.tld}')">
+            <button class="btn-secondary" data-action="view" data-name="${escapeHtml(listing.name)}" data-tld="${escapeHtml(listing.tld)}">
                 View Details
             </button>
         </div>
@@ -188,11 +215,36 @@ function createListingCard(listing) {
     return card;
 }
 
+// Event delegation handler for marketplace actions
+function handleMarketplaceAction(e) {
+    const target = e.target.closest('[data-action]');
+    if (!target) return;
+    
+    const action = target.dataset.action;
+    
+    if (action === 'buy') {
+        const listing = JSON.parse(target.dataset.listing);
+        buyDomain(listing);
+    } else if (action === 'view') {
+        const { name, tld } = target.dataset;
+        viewDomainDetails(name, tld);
+    }
+}
+
+// Utility function to escape HTML
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
 async function buyDomain(listing) {
-    if (!walletAddress) {
+    if (!walletManager.isConnected()) {
         alert('Please connect your wallet first!');
         return;
     }
+    
+    const walletAddress = walletManager.getAddress();
     
     // Check if buyer is the seller
     if (listing.seller === walletAddress) {
