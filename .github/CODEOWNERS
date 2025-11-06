@@ -1,0 +1,19 @@
+# Repository maintainers and code owners
+
+# Global owners - will be requested for review when someone opens a PR
+* @kfrye1212
+
+# JavaScript files
+*.js @kfrye1212
+
+# HTML files
+*.html @kfrye1212
+
+# CSS files
+*.css @kfrye1212
+
+# Documentation
+*.md @kfrye1212
+
+# GitHub workflows and configuration
+/.github/ @kfrye1212
