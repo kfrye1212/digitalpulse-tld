@@ -236,4 +236,4 @@ Currently all PRs are active (created within last week). Future policy:
 
 ---
 
-Last Updated: November 2025
+Last Updated: November 2024

@@ -1,6 +1,6 @@
 # Security Scan Findings
 
-## Scan Date: November 6, 2025
+## Scan Date: November 6, 2024
 
 ## Summary
 
@@ -11,14 +11,14 @@ A manual security review was conducted on the JavaScript codebase. The following
 ### 1. Potential XSS Vulnerability in Domain Name Display
 
 **Severity**: Medium  
-**File**: `app.js`, lines 96-97  
+**File**: `app.js`, line 96  
 **Status**: Documented for review
 
 **Description**:
 User input from domain searches is directly inserted into HTML using template literals in `innerHTML` without proper escaping.
 
 ```javascript
-// Vulnerable code
+// Vulnerable code (app.js, line 96)
 card.innerHTML = `
     <div class="result-domain">
         ${result.name}<span class="text-primary">${result.tld}</span>
@@ -58,10 +58,10 @@ card.innerHTML = `
 ### 2. Similar Issues in Other Files
 
 **Files Affected**:
-- `marketplace.js`: Lines 148+ (domain names in marketplace cards)
-- `my-domains.js`: Lines 107+ (domain names in user's domains)
+- `marketplace.js`: Line 151 (domain names in marketplace listing cards)
+- `my-domains.js`: Line 110 (domain names in user's domain cards)
 
-**Recommendation**: Apply same escaping to all user-controlled data displayed in HTML.
+**Recommendation**: Apply same HTML escaping to all user-controlled data displayed in HTML.
 
 ## CodeQL Analysis
 
@@ -139,4 +139,4 @@ The codebase demonstrates good security awareness with no critical vulnerabiliti
 ---
 
 **Reviewed by**: Copilot Coding Agent  
-**Next Review**: December 2025
+**Next Review**: December 2024

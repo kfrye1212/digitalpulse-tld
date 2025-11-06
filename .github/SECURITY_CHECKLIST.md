@@ -206,6 +206,6 @@ See [SECURITY.md](../SECURITY.md) for responsible disclosure process.
 
 ---
 
-**Last Security Review**: November 2025  
-**Next Review Due**: December 2025  
+**Last Security Review**: November 2024  
+**Next Review Due**: December 2024  
 **Security Officer**: Repository Owner

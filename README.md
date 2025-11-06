@@ -44,10 +44,9 @@ Then navigate to `http://localhost:8000`
 ## Available TLDs
 
 - .pulse
-- .web3
-- .sol
-- .crypto
-- .dao
+- .verse
+- .cp
+- .pv
 
 ## Documentation
 
