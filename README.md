@@ -53,6 +53,9 @@ Then navigate to `http://localhost:8000`
 
 - [Contributing Guidelines](CONTRIBUTING.md)
 - [Security Policy](SECURITY.md)
+- [Security Findings](.github/SECURITY_FINDINGS.md)
+- [PR & Issue Management](.github/PR_ISSUE_MANAGEMENT.md)
+- [Workflows Documentation](.github/WORKFLOWS.md)
 - [Issue Templates](.github/ISSUE_TEMPLATE/)
 - [PR Template](.github/pull_request_template.md)
 
@@ -62,6 +65,8 @@ This repository uses GitHub Actions for:
 
 - **Pages Deployment**: Automatic deployment to GitHub Pages on push to main branch
 - **Copilot Coding Agent**: Automated code improvements and issue resolution
+
+For detailed information about workflows, see [Workflows Documentation](.github/WORKFLOWS.md).
 
 ## Contributing
 
