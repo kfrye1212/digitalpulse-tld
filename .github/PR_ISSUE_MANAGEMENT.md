@@ -6,7 +6,7 @@ This guide documents how pull requests and issues are managed in this repository
 
 ### PR #6: Refactor codebase to eliminate duplication and optimize performance
 **Status**: Draft  
-**Created**: Nov 5, 2025  
+**Created**: Nov 5, 2024  
 **Purpose**: Code refactoring and performance improvements
 
 **Key Changes**:
@@ -21,7 +21,7 @@ This guide documents how pull requests and issues are managed in this repository
 
 ### PR #5: Replace static mock data with persistent localStorage-backed state
 **Status**: Draft  
-**Created**: Nov 4, 2025  
+**Created**: Nov 4, 2024  
 **Purpose**: Add persistent state management
 
 **Key Changes**:
@@ -36,7 +36,7 @@ This guide documents how pull requests and issues are managed in this repository
 
 ### PR #4: Add local test suite
 **Status**: Draft  
-**Created**: Nov 3, 2025  
+**Created**: Nov 3, 2024  
 **Purpose**: Add Jest-based testing infrastructure
 
 **Key Changes**:
@@ -51,7 +51,7 @@ This guide documents how pull requests and issues are managed in this repository
 
 ### PR #3: Optimize code performance
 **Status**: Draft  
-**Created**: Nov 2, 2025  
+**Created**: Nov 2, 2024  
 **Purpose**: Performance optimizations
 
 **Key Changes**:
