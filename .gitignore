@@ -1,0 +1,31 @@
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# Anchor
+.anchor/
+target/
+test-ledger/
+.DS_Store
+Cargo.lock
+
+# IDL
+*.so
+*.swp
+
+# Build artifacts
+programs/**/*.so
+programs/**/target/
+
+# Tests
+.anchor/test-ledger/
+
+# Environment
+.env
+.env.local
+
+# Solana
+deploy/
