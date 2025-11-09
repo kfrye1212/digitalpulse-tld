@@ -6,13 +6,13 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-digitalpulse_tld = "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"
+digitalpulse_tld = "AoK7A4kRVL6UYA4ydwUkjEXujBBPjcVh5VZvM4i8uKVt"
 
 [programs.devnet]
-digitalpulse_tld = "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"
+digitalpulse_tld = "AoK7A4kRVL6UYA4ydwUkjEXujBBPjcVh5VZvM4i8uKVt"
 
 [programs.mainnet]
-digitalpulse_tld = "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"
+digitalpulse_tld = "AoK7A4kRVL6UYA4ydwUkjEXujBBPjcVh5VZvM4i8uKVt"
 
 [registry]
 url = "https://api.apr.dev"

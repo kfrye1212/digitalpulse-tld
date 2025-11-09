@@ -10,6 +10,7 @@ yarn.lock
 target/
 test-ledger/
 .DS_Store
+Cargo.lock
 
 # IDL
 *.so
