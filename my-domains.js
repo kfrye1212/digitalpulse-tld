@@ -2,23 +2,48 @@
 const RENEWAL_FEE = 0.15; // SOL
 const MARKETPLACE_FEE = 0.05; // 5%
 
+// Cache DOM elements
+const domCache = {
+    connectPrompt: null,
+    domainsSection: null,
+    domainsContainer: null,
+    emptyState: null,
+    totalDomains: null,
+    activeDomains: null,
+    expiringSoon: null,
+    listedDomains: null
+};
+
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize DOM cache
+    domCache.connectPrompt = document.getElementById('connect-prompt');
+    domCache.domainsSection = document.getElementById('domains-section');
+    domCache.domainsContainer = document.getElementById('domains-container');
+    domCache.emptyState = document.getElementById('empty-state');
+    domCache.totalDomains = document.getElementById('total-domains');
+    domCache.activeDomains = document.getElementById('active-domains');
+    domCache.expiringSoon = document.getElementById('expiring-soon');
+    domCache.listedDomains = document.getElementById('listed-domains');
+    
     checkWalletAndLoadDomains();
     
-    // Listen for wallet changes
-    if (window.solana) {
-        window.solana.on('connect', () => {
-            checkWalletAndLoadDomains();
-        });
-        
-        window.solana.on('disconnect', () => {
-            showConnectPrompt();
-        });
+    // Set up event delegation for domain actions
+    if (domCache.domainsContainer) {
+        domCache.domainsContainer.addEventListener('click', handleDomainAction);
     }
+    
+    // Listen for wallet changes using walletManager
+    walletManager.on('connect', () => {
+        checkWalletAndLoadDomains();
+    });
+    
+    walletManager.on('disconnect', () => {
+        showConnectPrompt();
+    });
 });
 
 async function checkWalletAndLoadDomains() {
-    if (walletAddress) {
+    if (walletManager.isConnected()) {
         await loadUserDomains();
     } else {
         showConnectPrompt();
@@ -26,17 +51,24 @@ async function checkWalletAndLoadDomains() {
 }
 
 function showConnectPrompt() {
-    document.getElementById('connect-prompt').style.display = 'block';
-    document.getElementById('domains-section').style.display = 'none';
+    if (domCache.connectPrompt && domCache.domainsSection) {
+        domCache.connectPrompt.style.display = 'block';
+        domCache.domainsSection.style.display = 'none';
+    }
 }
 
 function hideConnectPrompt() {
-    document.getElementById('connect-prompt').style.display = 'none';
-    document.getElementById('domains-section').style.display = 'block';
+    if (domCache.connectPrompt && domCache.domainsSection) {
+        domCache.connectPrompt.style.display = 'none';
+        domCache.domainsSection.style.display = 'block';
+    }
 }
 
 async function loadUserDomains() {
     hideConnectPrompt();
+    
+    const walletAddress = walletManager.getAddress();
+    if (!walletAddress) return;
     
     // TODO: Replace with actual smart contract call
     // For now, simulate with demo data
@@ -79,22 +111,26 @@ async function fetchUserDomains(walletAddress) {
 }
 
 function displayDomains(domains) {
-    const container = document.getElementById('domains-container');
-    const emptyState = document.getElementById('empty-state');
+    if (!domCache.domainsContainer || !domCache.emptyState) return;
     
     if (domains.length === 0) {
-        container.innerHTML = '';
-        emptyState.style.display = 'block';
+        domCache.domainsContainer.innerHTML = '';
+        domCache.emptyState.style.display = 'block';
         return;
     }
     
-    emptyState.style.display = 'none';
-    container.innerHTML = '';
+    domCache.emptyState.style.display = 'none';
+    
+    // Use DocumentFragment for better performance
+    const fragment = document.createDocumentFragment();
     
     domains.forEach(domain => {
         const card = createDomainCard(domain);
-        container.appendChild(card);
+        fragment.appendChild(card);
     });
+    
+    domCache.domainsContainer.innerHTML = '';
+    domCache.domainsContainer.appendChild(fragment);
 }
 
 function createDomainCard(domain) {
@@ -107,7 +143,7 @@ function createDomainCard(domain) {
     card.innerHTML = `
         <div class="domain-card-header">
             <div class="domain-name-large">
-                ${domain.name}<span class="text-primary">${domain.tld}</span>
+                ${escapeHtml(domain.name)}<span class="text-primary">${escapeHtml(domain.tld)}</span>
             </div>
             ${domain.isListed ? '<span class="badge-listed">Listed</span>' : ''}
             ${isExpiringSoon ? '<span class="badge-expiring">Expiring Soon</span>' : ''}
@@ -124,7 +160,7 @@ function createDomainCard(domain) {
             </div>
             <div class="info-row">
                 <span class="info-label">NFT Mint:</span>
-                <span class="info-value mono">${domain.nftMint}</span>
+                <span class="info-value mono">${escapeHtml(domain.nftMint)}</span>
             </div>
             ${domain.isListed ? `
                 <div class="info-row">
@@ -135,20 +171,44 @@ function createDomainCard(domain) {
         </div>
         
         <div class="domain-card-actions">
-            <button class="btn-secondary" onclick="renewDomain('${domain.name}', '${domain.tld}')">
+            <button class="btn-secondary" data-action="renew" data-name="${escapeHtml(domain.name)}" data-tld="${escapeHtml(domain.tld)}">
                 Renew (${RENEWAL_FEE} SOL)
             </button>
-            <button class="btn-secondary" onclick="transferDomain('${domain.name}', '${domain.tld}')">
+            <button class="btn-secondary" data-action="transfer" data-name="${escapeHtml(domain.name)}" data-tld="${escapeHtml(domain.tld)}">
                 Transfer
             </button>
             ${domain.isListed ? 
-                `<button class="btn-secondary" onclick="unlistDomain('${domain.name}', '${domain.tld}')">Unlist</button>` :
-                `<button class="btn-primary" onclick="listDomain('${domain.name}', '${domain.tld}')">List for Sale</button>`
+                `<button class="btn-secondary" data-action="unlist" data-name="${escapeHtml(domain.name)}" data-tld="${escapeHtml(domain.tld)}">Unlist</button>` :
+                `<button class="btn-primary" data-action="list" data-name="${escapeHtml(domain.name)}" data-tld="${escapeHtml(domain.tld)}">List for Sale</button>`
             }
         </div>
     `;
     
     return card;
+}
+
+// Event delegation handler for domain actions
+function handleDomainAction(e) {
+    const target = e.target.closest('[data-action]');
+    if (!target) return;
+    
+    const action = target.dataset.action;
+    const { name, tld } = target.dataset;
+    
+    switch (action) {
+        case 'renew':
+            renewDomain(name, tld);
+            break;
+        case 'transfer':
+            transferDomain(name, tld);
+            break;
+        case 'list':
+            listDomain(name, tld);
+            break;
+        case 'unlist':
+            unlistDomain(name, tld);
+            break;
+    }
 }
 
 function updateStats(domains) {
@@ -160,18 +220,20 @@ function updateStats(domains) {
     }).length;
     const listedDomains = domains.filter(d => d.isListed).length;
     
-    document.getElementById('total-domains').textContent = totalDomains;
-    document.getElementById('active-domains').textContent = activeDomains;
-    document.getElementById('expiring-soon').textContent = expiringSoon;
-    document.getElementById('listed-domains').textContent = listedDomains;
+    if (domCache.totalDomains) domCache.totalDomains.textContent = totalDomains;
+    if (domCache.activeDomains) domCache.activeDomains.textContent = activeDomains;
+    if (domCache.expiringSoon) domCache.expiringSoon.textContent = expiringSoon;
+    if (domCache.listedDomains) domCache.listedDomains.textContent = listedDomains;
 }
 
 // Domain Actions
 async function renewDomain(name, tld) {
-    if (!walletAddress) {
+    if (!walletManager.isConnected()) {
         alert('Please connect your wallet first!');
         return;
     }
+    
+    const walletAddress = walletManager.getAddress();
     
     const confirmed = confirm(
         `Renew ${name}${tld} for 1 year?\n\n` +
@@ -188,10 +250,12 @@ async function renewDomain(name, tld) {
 }
 
 async function transferDomain(name, tld) {
-    if (!walletAddress) {
+    if (!walletManager.isConnected()) {
         alert('Please connect your wallet first!');
         return;
     }
+    
+    const walletAddress = walletManager.getAddress();
     
     const recipientAddress = prompt(
         `Transfer ${name}${tld} to:\n\n` +
@@ -218,7 +282,7 @@ async function transferDomain(name, tld) {
 }
 
 async function listDomain(name, tld) {
-    if (!walletAddress) {
+    if (!walletManager.isConnected()) {
         alert('Please connect your wallet first!');
         return;
     }
@@ -253,7 +317,7 @@ async function listDomain(name, tld) {
 }
 
 async function unlistDomain(name, tld) {
-    if (!walletAddress) {
+    if (!walletManager.isConnected()) {
         alert('Please connect your wallet first!');
         return;
     }
@@ -268,11 +332,5 @@ async function unlistDomain(name, tld) {
         // After successful unlisting, reload domains
         // await loadUserDomains();
     }
-}
-
-// Utility Functions
-function formatDate(date) {
-    const options = { year: 'numeric', month: 'short', day: 'numeric' };
-    return date.toLocaleDateString('en-US', options);
 }
 

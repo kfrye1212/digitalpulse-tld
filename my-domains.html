@@ -46,7 +46,7 @@
                 <p style="color: rgba(255, 255, 255, 0.6); margin-bottom: 24px;">
                     Connect your Phantom wallet to view and manage your domains
                 </p>
-                <button onclick="connectWallet()" class="btn-primary">Connect Wallet</button>
+                <button onclick="walletManager.connect()" class="btn-primary">Connect Wallet</button>
             </div>
 
             <!-- Domains Grid (hidden until wallet connected) -->
@@ -138,6 +138,8 @@
 
     <!-- Scripts -->
     <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+    <script src="utils.js"></script>
+    <script src="wallet.js"></script>
     <script src="app.js"></script>
     <script src="my-domains.js"></script>
 </body>

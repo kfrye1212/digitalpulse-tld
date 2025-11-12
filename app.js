@@ -1,13 +1,11 @@
 // TLD Options
 const TLDS = ['.pulse', '.verse', '.cp', '.pv'];
 let selectedTLD = 'all';
-let walletAddress = null;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     initializeTLDSelector();
     initializeSearch();
-    initializeWallet();
 });
 
 // TLD Selector
@@ -28,6 +26,8 @@ function initializeSearch() {
     const searchInput = document.getElementById('domain-search');
     const searchBtn = document.getElementById('search-btn');
     
+    if (!searchInput || !searchBtn) return;
+    
     searchBtn.addEventListener('click', performSearch);
     
     searchInput.addEventListener('keypress', (e) => {
@@ -35,6 +35,16 @@ function initializeSearch() {
             performSearch();
         }
     });
+    
+    // Add debounced input handler for live feedback (optional)
+    const debouncedSearch = debounce(() => {
+        const query = searchInput.value.trim();
+        if (query.length > 2) {
+            // Could show suggestions or validation here
+        }
+    }, 300);
+    
+    searchInput.addEventListener('input', debouncedSearch);
 }
 
 async function performSearch() {
@@ -69,6 +79,8 @@ function displayResults(results) {
     const resultsSection = document.getElementById('search-results');
     const resultsContainer = document.getElementById('results-container');
     
+    if (!resultsSection || !resultsContainer) return;
+    
     resultsSection.style.display = 'block';
     resultsContainer.innerHTML = '';
     
@@ -77,8 +89,20 @@ function displayResults(results) {
         resultsContainer.appendChild(card);
     });
     
+    // Set up event delegation for register buttons
+    resultsContainer.addEventListener('click', handleResultAction);
+    
     // Scroll to results
     resultsSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function handleResultAction(e) {
+    const registerBtn = e.target.closest('[data-action="register"]');
+    if (registerBtn) {
+        e.preventDefault();
+        const { name, tld, price } = registerBtn.dataset;
+        registerDomain(name, tld, parseFloat(price));
+    }
 }
 
 function createResultCard(result) {
@@ -93,7 +117,7 @@ function createResultCard(result) {
             <div class="status-dot ${statusClass}"></div>
             <div>
                 <div class="result-domain">
-                    ${result.name}<span class="text-primary">${result.tld}</span>
+                    ${escapeHtml(result.name)}<span class="text-primary">${escapeHtml(result.tld)}</span>
                 </div>
                 <div class="result-status">${statusText}</div>
             </div>
@@ -104,7 +128,7 @@ function createResultCard(result) {
                 <div class="price-label">Registration fee</div>
             </div>
             ${result.available ? 
-                `<button class="btn-primary" onclick="registerDomain('${result.name}', '${result.tld}', ${result.price})">Register</button>` :
+                `<button class="btn-primary" data-action="register" data-name="${escapeHtml(result.name)}" data-tld="${escapeHtml(result.tld)}" data-price="${result.price}">Register</button>` :
                 `<button class="btn-secondary" disabled>Unavailable</button>`
             }
         </div>
@@ -115,10 +139,12 @@ function createResultCard(result) {
 
 // Domain Registration
 function registerDomain(name, tld, price) {
-    if (!walletAddress) {
+    if (!walletManager.isConnected()) {
         alert('Please connect your wallet first!');
         return;
     }
+    
+    const walletAddress = walletManager.getAddress();
     
     // TODO: Implement actual Solana transaction
     const confirmed = confirm(
@@ -131,89 +157,5 @@ function registerDomain(name, tld, price) {
     if (confirmed) {
         alert('Registration initiated! Smart contract integration in progress.');
     }
-}
-
-// Wallet Integration
-async function initializeWallet() {
-    const walletButtonContainer = document.getElementById('wallet-button-container');
-    
-    // Check if Phantom wallet is installed
-    const isPhantomInstalled = window.solana && window.solana.isPhantom;
-    
-    if (!isPhantomInstalled) {
-        walletButtonContainer.innerHTML = `
-            <a href="https://phantom.app/" target="_blank" class="btn-secondary">
-                Install Phantom
-            </a>
-        `;
-        return;
-    }
-    
-    // Create wallet button
-    const walletBtn = document.createElement('button');
-    walletBtn.className = 'btn-primary';
-    walletBtn.textContent = 'Connect Wallet';
-    walletBtn.onclick = connectWallet;
-    
-    walletButtonContainer.appendChild(walletBtn);
-    
-    // Check if already connected
-    try {
-        const response = await window.solana.connect({ onlyIfTrusted: true });
-        walletAddress = response.publicKey.toString();
-        updateWalletButton(walletBtn);
-    } catch (err) {
-        // Not connected yet
-    }
-}
-
-async function connectWallet() {
-    try {
-        const response = await window.solana.connect();
-        walletAddress = response.publicKey.toString();
-        
-        const walletBtn = document.querySelector('#wallet-button-container button');
-        updateWalletButton(walletBtn);
-        
-        console.log('Connected to wallet:', walletAddress);
-    } catch (err) {
-        console.error('Failed to connect wallet:', err);
-        alert('Failed to connect wallet. Please try again.');
-    }
-}
-
-function updateWalletButton(btn) {
-    if (walletAddress) {
-        btn.textContent = `${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}`;
-        btn.onclick = disconnectWallet;
-    }
-}
-
-async function disconnectWallet() {
-    try {
-        await window.solana.disconnect();
-        walletAddress = null;
-        
-        const walletBtn = document.querySelector('#wallet-button-container button');
-        walletBtn.textContent = 'Connect Wallet';
-        walletBtn.onclick = connectWallet;
-        
-        console.log('Disconnected wallet');
-    } catch (err) {
-        console.error('Failed to disconnect wallet:', err);
-    }
-}
-
-// Listen for wallet changes
-if (window.solana) {
-    window.solana.on('connect', (publicKey) => {
-        walletAddress = publicKey.toString();
-        console.log('Wallet connected:', walletAddress);
-    });
-    
-    window.solana.on('disconnect', () => {
-        walletAddress = null;
-        console.log('Wallet disconnected');
-    });
 }
 
