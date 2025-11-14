@@ -4,26 +4,35 @@
 
 A decentralized top-level domain (TLD) registration platform built on the Solana blockchain. Register, manage, and trade custom domain names as NFTs.
 
+## 🚀 Now Live with Smart Contract Integration!
+
+The platform is now fully integrated with Solana blockchain transactions:
+- ✅ **Real Wallet Connections**: Connect with Phantom, Solflare, and other Solana wallets
+- ✅ **Live Transactions**: All operations create real blockchain transactions
+- ✅ **Revenue Generation**: Platform earns fees from registration, renewals, and marketplace sales
+- ✅ **NFT Domains**: Each domain is a tradeable NFT on Solana
+
 ## Features
 
-- 🔍 **Domain Search**: Check availability of domains across multiple TLDs
+- 🔍 **Domain Search**: Check availability of domains across multiple TLDs with blockchain verification
 - 💼 **My Domains**: Manage your registered domains with renewal, transfer, and listing capabilities
-- 🏪 **Marketplace**: Buy and sell domains with built-in marketplace functionality
+- 🏪 **Marketplace**: Buy and sell domains with built-in marketplace functionality (5% platform fee)
 - 🔐 **Wallet Integration**: Seamless connection with Solana wallets (Phantom, Solflare, etc.)
 - ⛓️ **Blockchain-Based**: All domains are NFTs on the Solana blockchain
+- 💰 **Transaction Confirmations**: Real-time blockchain transaction confirmations
 
 ## Getting Started
 
 ### Prerequisites
 
 - A Solana wallet (Phantom, Solflare, or compatible wallet extension)
-- SOL tokens for transactions
+- SOL tokens for transactions (0.25 SOL for registration, 0.15 SOL for renewal)
 
 ### Using the Application
 
 1. Visit the live site: [https://kfrye1212.github.io/digitalpulse-tld/](https://kfrye1212.github.io/digitalpulse-tld/)
 2. Connect your Solana wallet
-3. Search for and register available domains
+3. Search for and register available domains (creates blockchain transaction)
 4. Manage your domains or browse the marketplace
 
 ### Local Development
@@ -47,6 +56,15 @@ Then navigate to `http://localhost:8000`
 - .verse
 - .cp
 - .pv
+
+## Smart Contract Integration
+
+The platform now includes full Solana blockchain integration. See [SMART_CONTRACT_SETUP.md](SMART_CONTRACT_SETUP.md) for details on:
+- How the smart contract integration works
+- Transaction flows for all operations
+- Configuration options
+- Deployment instructions
+- Revenue generation model
 
 ## Documentation
 

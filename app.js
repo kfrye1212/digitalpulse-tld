@@ -47,17 +47,19 @@ async function performSearch() {
     searchBtn.disabled = true;
     searchBtn.textContent = 'Searching...';
     
-    // Simulate search delay
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    // Generate results
+    // Check availability on blockchain
     const tldsToSearch = selectedTLD === 'all' ? TLDS : [selectedTLD];
-    const results = tldsToSearch.map(tld => ({
-        name: query,
-        tld: tld,
-        available: Math.random() > 0.3, // Random availability for demo
-        price: 0.25
-    }));
+    const results = await Promise.all(
+        tldsToSearch.map(async tld => {
+            const available = await solanaContract.checkDomainAvailability(query, tld);
+            return {
+                name: query,
+                tld: tld,
+                available: available,
+                price: 0.25
+            };
+        })
+    );
     
     displayResults(results);
     
@@ -114,22 +116,63 @@ function createResultCard(result) {
 }
 
 // Domain Registration
-function registerDomain(name, tld, price) {
+async function registerDomain(name, tld, price) {
     if (!walletAddress) {
         alert('Please connect your wallet first!');
         return;
     }
     
-    // TODO: Implement actual Solana transaction
     const confirmed = confirm(
         `Register ${name}${tld}?\n\n` +
         `Price: ${price} SOL\n` +
         `Wallet: ${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}\n\n` +
-        `Smart contract integration coming soon!`
+        `This will create a transaction on Solana blockchain.`
     );
     
     if (confirmed) {
-        alert('Registration initiated! Smart contract integration in progress.');
+        try {
+            // Show processing state
+            const resultsContainer = document.getElementById('results-container');
+            const processingMsg = document.createElement('div');
+            processingMsg.className = 'card-glass';
+            processingMsg.style.cssText = 'text-align: center; padding: 32px; margin-top: 20px;';
+            processingMsg.innerHTML = `
+                <p style="color: rgba(255, 255, 255, 0.8); margin-bottom: 12px;">
+                    🔄 Processing registration for ${name}${tld}...
+                </p>
+                <p style="color: rgba(255, 255, 255, 0.6); font-size: 14px;">
+                    Please approve the transaction in your wallet
+                </p>
+            `;
+            resultsContainer.appendChild(processingMsg);
+
+            // Execute blockchain transaction
+            const result = await solanaContract.registerDomain(name, tld, price);
+            
+            if (result.success) {
+                processingMsg.innerHTML = `
+                    <p style="color: #00ff88; margin-bottom: 12px; font-size: 18px;">
+                        ✅ Domain Registered Successfully!
+                    </p>
+                    <p style="color: rgba(255, 255, 255, 0.8); margin-bottom: 8px;">
+                        ${name}${tld}
+                    </p>
+                    <p style="color: rgba(255, 255, 255, 0.6); font-size: 14px; margin-bottom: 12px;">
+                        Transaction: ${result.signature.slice(0, 8)}...${result.signature.slice(-8)}
+                    </p>
+                    <a href="my-domains.html" class="btn-primary" style="display: inline-block; margin-top: 12px;">
+                        View My Domains
+                    </a>
+                `;
+            }
+        } catch (error) {
+            console.error('Registration failed:', error);
+            alert(
+                'Registration failed!\n\n' +
+                'Error: ' + (error.message || 'Unknown error') + '\n\n' +
+                'Please make sure you have enough SOL in your wallet and try again.'
+            );
+        }
     }
 }
 
