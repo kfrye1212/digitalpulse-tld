@@ -47,35 +47,11 @@ async function loadUserDomains() {
 }
 
 async function fetchUserDomains(walletAddress) {
-    // TODO: Implement actual Solana program call
-    // This is demo data for now
-    
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 500));
     
-    // Demo domains (replace with actual blockchain query)
-    const demoDomains = [
-        {
-            name: 'myname',
-            tld: '.pulse',
-            registeredDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-            expiryDate: new Date(Date.now() + 335 * 24 * 60 * 60 * 1000),
-            isListed: false,
-            listPrice: null,
-            nftMint: 'ABC123...'
-        },
-        {
-            name: 'crypto',
-            tld: '.verse',
-            registeredDate: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000),
-            expiryDate: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000),
-            isListed: true,
-            listPrice: 5.0,
-            nftMint: 'DEF456...'
-        }
-    ];
-    
-    return demoDomains;
+    // Get domains from blockchain simulation
+    return BlockchainSim.getUserDomains(walletAddress);
 }
 
 function displayDomains(domains) {
@@ -180,10 +156,13 @@ async function renewDomain(name, tld) {
     );
     
     if (confirmed) {
-        // TODO: Implement actual Solana transaction
-        alert('Renewal transaction initiated! Smart contract integration in progress.');
-        // After successful renewal, reload domains
-        // await loadUserDomains();
+        try {
+            BlockchainSim.renewDomain(name, tld, walletAddress);
+            alert(`Success! ${name}${tld} has been renewed for 1 year.`);
+            await loadUserDomains();
+        } catch (error) {
+            alert(`Renewal failed: ${error.message}`);
+        }
     }
 }
 
@@ -207,10 +186,13 @@ async function transferDomain(name, tld) {
         );
         
         if (confirmed) {
-            // TODO: Implement actual Solana NFT transfer
-            alert('Transfer transaction initiated! Smart contract integration in progress.');
-            // After successful transfer, reload domains
-            // await loadUserDomains();
+            try {
+                BlockchainSim.transferDomain(name, tld, walletAddress, recipientAddress);
+                alert(`Success! ${name}${tld} has been transferred to ${recipientAddress.slice(0, 4)}...${recipientAddress.slice(-4)}`);
+                await loadUserDomains();
+            } catch (error) {
+                alert(`Transfer failed: ${error.message}`);
+            }
         }
     } else if (recipientAddress) {
         alert('Invalid wallet address. Please enter a valid Solana address.');
@@ -242,10 +224,13 @@ async function listDomain(name, tld) {
         );
         
         if (confirmed) {
-            // TODO: Implement actual marketplace listing
-            alert('Listing transaction initiated! Smart contract integration in progress.');
-            // After successful listing, reload domains
-            // await loadUserDomains();
+            try {
+                BlockchainSim.listDomain(name, tld, walletAddress, priceNum);
+                alert(`Success! ${name}${tld} is now listed for ${priceNum} SOL on the marketplace.`);
+                await loadUserDomains();
+            } catch (error) {
+                alert(`Listing failed: ${error.message}`);
+            }
         }
     } else if (price) {
         alert('Invalid price. Please enter a valid number.');
@@ -263,10 +248,13 @@ async function unlistDomain(name, tld) {
     );
     
     if (confirmed) {
-        // TODO: Implement actual marketplace unlisting
-        alert('Unlisting transaction initiated! Smart contract integration in progress.');
-        // After successful unlisting, reload domains
-        // await loadUserDomains();
+        try {
+            BlockchainSim.unlistDomain(name, tld, walletAddress);
+            alert(`Success! ${name}${tld} has been removed from the marketplace.`);
+            await loadUserDomains();
+        } catch (error) {
+            alert(`Unlisting failed: ${error.message}`);
+        }
     }
 }
 
