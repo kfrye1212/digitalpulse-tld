@@ -3,13 +3,22 @@ const MARKETPLACE_FEE_PERCENT = 5; // 5%
 
 let allListings = [];
 let filteredListings = [];
+let solanaConnection = null;
 
-document.addEventListener('DOMContentLoaded', () => {
-    loadMarketplaceListings();
+document.addEventListener('DOMContentLoaded', async () => {
+    // Initialize Solana connection
+    try {
+        solanaConnection = await createSolanaConnection();
+        console.log('Marketplace connected to Solana:', getSolanaConfig().network);
+    } catch (error) {
+        console.error('Failed to connect to Solana:', error);
+    }
+    
+    await loadMarketplaceListings();
 });
 
 async function loadMarketplaceListings() {
-    // TODO: Replace with actual smart contract call
+    // In production, this would fetch from the Solana program
     allListings = await fetchMarketplaceListings();
     filteredListings = [...allListings];
     
@@ -17,13 +26,13 @@ async function loadMarketplaceListings() {
 }
 
 async function fetchMarketplaceListings() {
-    // TODO: Implement actual Solana program call
-    // This is demo data for now
+    // In production, this would query the Solana program for all listed domains
+    // For now, showing demo data
     
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 800));
     
-    // Demo listings (replace with actual blockchain query)
+    // Demo listings (in production, fetch from blockchain)
     const demoListings = [
         {
             name: 'crypto',
@@ -189,13 +198,20 @@ function createListingCard(listing) {
 }
 
 async function buyDomain(listing) {
-    if (!walletAddress) {
+    const provider = getWalletProvider();
+    
+    if (!walletAddress || !provider) {
         alert('Please connect your wallet first!');
         return;
     }
     
+    if (!solanaConnection) {
+        alert('Solana connection not available. Please refresh the page.');
+        return;
+    }
+    
     // Check if buyer is the seller
-    if (listing.seller === walletAddress) {
+    if (listing.seller === formatWalletAddress(walletAddress)) {
         alert('You cannot buy your own domain!');
         return;
     }
@@ -208,30 +224,66 @@ async function buyDomain(listing) {
         `Total Price: ${listing.price} SOL\n` +
         `Marketplace Fee (${MARKETPLACE_FEE_PERCENT}%): ${marketplaceFee.toFixed(3)} SOL\n` +
         `Seller Receives: ${sellerReceives.toFixed(3)} SOL\n\n` +
-        `From: ${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}\n` +
-        `To: ${listing.seller.slice(0, 4)}...${listing.seller.slice(-4)}`
+        `Your Wallet: ${formatWalletAddress(walletAddress)}\n` +
+        `Seller: ${listing.seller}\n\n` +
+        `Network: ${getSolanaConfig().network}`
     );
     
-    if (confirmed) {
-        // TODO: Implement actual Solana marketplace purchase transaction
-        // This should:
-        // 1. Transfer SOL from buyer to seller (minus marketplace fee)
-        // 2. Transfer marketplace fee to platform wallet
-        // 3. Transfer NFT ownership from seller to buyer
-        // 4. Remove listing from marketplace
+    if (!confirmed) return;
+    
+    try {
+        // Show loading indicator
+        const buyButtons = document.querySelectorAll('.btn-primary');
+        buyButtons.forEach(btn => {
+            if (btn.textContent.includes('Buy')) {
+                btn.disabled = true;
+                btn.textContent = 'Processing...';
+            }
+        });
         
-        alert(
-            'Purchase transaction initiated!\n\n' +
-            'Smart contract integration in progress.\n\n' +
-            'Transaction will:\n' +
-            `- Transfer ${listing.price} SOL from your wallet\n` +
-            `- Send ${sellerReceives.toFixed(3)} SOL to seller\n` +
-            `- Send ${marketplaceFee.toFixed(3)} SOL marketplace fee\n` +
-            `- Transfer ${listing.name}${listing.tld} NFT to you`
+        // Simulate marketplace purchase transaction
+        const result = await simulateMarketplacePurchase(
+            solanaConnection,
+            provider,
+            listing
         );
         
-        // After successful purchase, reload marketplace
-        // await loadMarketplaceListings();
+        if (result.success) {
+            const explorerLink = getExplorerLink(result.signature);
+            alert(
+                `✅ Domain purchased successfully!\n\n` +
+                `Domain: ${result.domain}\n` +
+                `Transaction: ${result.signature.slice(0, 8)}...\n\n` +
+                `View on Solana Explorer:\n${explorerLink}\n\n` +
+                `Note: This is a test transaction. Full marketplace integration coming soon.`
+            );
+            console.log('Purchase result:', result);
+            
+            // Reload marketplace listings
+            await loadMarketplaceListings();
+        } else {
+            throw new Error(result.error);
+        }
+    } catch (error) {
+        console.error('Purchase failed:', error);
+        alert(
+            `❌ Purchase failed!\n\n` +
+            `Error: ${error.message}\n\n` +
+            `Please ensure you have enough SOL and try again.`
+        );
+    } finally {
+        // Restore button states
+        const buyButtons = document.querySelectorAll('.btn-primary');
+        buyButtons.forEach(btn => {
+            if (btn.textContent.includes('Processing')) {
+                btn.disabled = false;
+                const priceMatch = btn.parentElement.parentElement.querySelector('.listing-price-value');
+                if (priceMatch) {
+                    const price = priceMatch.textContent.split(' ')[0];
+                    btn.textContent = `Buy for ${price} SOL`;
+                }
+            }
+        });
     }
 }
 
