@@ -186,16 +186,15 @@ async function renewDomain(name, tld) {
         return;
     }
     
-    if (!solanaConnection) {
-        alert('Solana connection not available. Please refresh the page.');
-        return;
-    }
+    const connection = myDomainsSolanaConnection;
+    const demoMode = !connection;
+    const networkInfo = demoMode ? 'demo mode' : getSolanaConfig().network;
     
     const confirmed = confirm(
         `Renew ${name}${tld} for 1 year?\n\n` +
         `Renewal Fee: ${RENEWAL_FEE} SOL\n` +
         `Wallet: ${formatWalletAddress(walletAddress)}\n` +
-        `Network: ${getSolanaConfig().network}`
+        `Network: ${networkInfo}`
     );
     
     if (!confirmed) return;
@@ -203,20 +202,20 @@ async function renewDomain(name, tld) {
     try {
         // Simulate domain renewal transaction
         const result = await simulateDomainRenewal(
-            solanaConnection,
+            connection,
             provider,
             name,
             tld
         );
         
         if (result.success) {
-            const explorerLink = getExplorerLink(result.signature);
+            const explorerLink = demoMode ? '' : getExplorerLink(result.signature);
+            const explorerText = explorerLink ? `\n\nView on Solana Explorer:\n${explorerLink}` : '';
             alert(
                 `✅ Domain renewed successfully!\n\n` +
                 `Domain: ${result.domain}\n` +
-                `Transaction: ${result.signature.slice(0, 8)}...\n\n` +
-                `View on Solana Explorer:\n${explorerLink}\n\n` +
-                `Note: This is a test transaction. Full contract integration coming soon.`
+                `Transaction: ${result.signature.slice(0, 8)}...${explorerText}\n\n` +
+                `Note: This is a ${demoMode ? 'demo' : 'test'} transaction. Full contract integration coming soon.`
             );
             console.log('Renewal result:', result);
             
@@ -243,10 +242,7 @@ async function transferDomain(name, tld) {
         return;
     }
     
-    if (!solanaConnection) {
-        alert('Solana connection not available. Please refresh the page.');
-        return;
-    }
+    const connection = myDomainsSolanaConnection;
     
     const recipientAddress = prompt(
         `Transfer ${name}${tld} to:\n\n` +
@@ -272,7 +268,7 @@ async function transferDomain(name, tld) {
     try {
         // Simulate domain transfer transaction
         const result = await simulateDomainTransfer(
-            solanaConnection,
+            connection,
             provider,
             name,
             tld,
@@ -280,14 +276,15 @@ async function transferDomain(name, tld) {
         );
         
         if (result.success) {
-            const explorerLink = getExplorerLink(result.signature);
+            const demoMode = !connection;
+            const explorerLink = demoMode ? '' : getExplorerLink(result.signature);
+            const explorerText = explorerLink ? `\n\nView on Solana Explorer:\n${explorerLink}` : '';
             alert(
                 `✅ Domain transferred successfully!\n\n` +
                 `Domain: ${result.domain}\n` +
                 `Recipient: ${formatWalletAddress(result.recipient)}\n` +
-                `Transaction: ${result.signature.slice(0, 8)}...\n\n` +
-                `View on Solana Explorer:\n${explorerLink}\n\n` +
-                `Note: This is a test transaction. Full contract integration coming soon.`
+                `Transaction: ${result.signature.slice(0, 8)}...${explorerText}\n\n` +
+                `Note: This is a ${demoMode ? 'demo' : 'test'} transaction. Full contract integration coming soon.`
             );
             console.log('Transfer result:', result);
             
@@ -313,6 +310,9 @@ async function listDomain(name, tld) {
         return;
     }
     
+    const connection = myDomainsSolanaConnection;
+    const demoMode = !connection;
+    
     const price = prompt(
         `List ${name}${tld} for sale\n\n` +
         `Enter price in SOL:\n` +
@@ -329,13 +329,14 @@ async function listDomain(name, tld) {
     const priceNum = parseFloat(price);
     const fee = priceNum * MARKETPLACE_FEE;
     const youReceive = priceNum - fee;
+    const networkInfo = demoMode ? 'demo mode' : getSolanaConfig().network;
     
     const confirmed = confirm(
         `List ${name}${tld} for ${priceNum} SOL?\n\n` +
         `List Price: ${priceNum} SOL\n` +
         `Marketplace Fee (${MARKETPLACE_FEE * 100}%): ${fee.toFixed(3)} SOL\n` +
         `You Receive: ${youReceive.toFixed(3)} SOL\n\n` +
-        `Network: ${getSolanaConfig().network}`
+        `Network: ${networkInfo}`
     );
     
     if (!confirmed) return;
@@ -346,7 +347,7 @@ async function listDomain(name, tld) {
             `✅ Domain listed successfully!\n\n` +
             `Domain: ${name}${tld}\n` +
             `Price: ${priceNum} SOL\n\n` +
-            `Note: This is a test listing. Full marketplace integration coming soon.`
+            `Note: This is a ${demoMode ? 'demo' : 'test'} listing. Full marketplace integration coming soon.`
         );
         console.log('Domain listed:', { name, tld, price: priceNum });
         

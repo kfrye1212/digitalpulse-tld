@@ -3,13 +3,17 @@ const MARKETPLACE_FEE_PERCENT = 5; // 5%
 
 let allListings = [];
 let filteredListings = [];
-let solanaConnection = null;
+let marketplaceSolanaConnection = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
     // Initialize Solana connection
     try {
-        solanaConnection = await createSolanaConnection();
-        console.log('Marketplace connected to Solana:', getSolanaConfig().network);
+        marketplaceSolanaConnection = await createSolanaConnection();
+        if (marketplaceSolanaConnection) {
+            console.log('Marketplace connected to Solana:', getSolanaConfig().network);
+        } else {
+            console.log('Marketplace running in demo mode');
+        }
     } catch (error) {
         console.error('Failed to connect to Solana:', error);
     }
@@ -205,10 +209,8 @@ async function buyDomain(listing) {
         return;
     }
     
-    if (!solanaConnection) {
-        alert('Solana connection not available. Please refresh the page.');
-        return;
-    }
+    const connection = marketplaceSolanaConnection;
+    const demoMode = !connection;
     
     // Check if buyer is the seller
     if (listing.seller === formatWalletAddress(walletAddress)) {
@@ -218,6 +220,7 @@ async function buyDomain(listing) {
     
     const marketplaceFee = listing.price * (MARKETPLACE_FEE_PERCENT / 100);
     const sellerReceives = listing.price - marketplaceFee;
+    const networkInfo = demoMode ? 'demo mode' : getSolanaConfig().network;
     
     const confirmed = confirm(
         `Buy ${listing.name}${listing.tld}?\n\n` +
@@ -226,7 +229,7 @@ async function buyDomain(listing) {
         `Seller Receives: ${sellerReceives.toFixed(3)} SOL\n\n` +
         `Your Wallet: ${formatWalletAddress(walletAddress)}\n` +
         `Seller: ${listing.seller}\n\n` +
-        `Network: ${getSolanaConfig().network}`
+        `Network: ${networkInfo}`
     );
     
     if (!confirmed) return;
@@ -243,19 +246,19 @@ async function buyDomain(listing) {
         
         // Simulate marketplace purchase transaction
         const result = await simulateMarketplacePurchase(
-            solanaConnection,
+            connection,
             provider,
             listing
         );
         
         if (result.success) {
-            const explorerLink = getExplorerLink(result.signature);
+            const explorerLink = demoMode ? '' : getExplorerLink(result.signature);
+            const explorerText = explorerLink ? `\n\nView on Solana Explorer:\n${explorerLink}` : '';
             alert(
                 `✅ Domain purchased successfully!\n\n` +
                 `Domain: ${result.domain}\n` +
-                `Transaction: ${result.signature.slice(0, 8)}...\n\n` +
-                `View on Solana Explorer:\n${explorerLink}\n\n` +
-                `Note: This is a test transaction. Full marketplace integration coming soon.`
+                `Transaction: ${result.signature.slice(0, 8)}...${explorerText}\n\n` +
+                `Note: This is a ${demoMode ? 'demo' : 'test'} transaction. Full marketplace integration coming soon.`
             );
             console.log('Purchase result:', result);
             
