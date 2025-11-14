@@ -5,8 +5,18 @@ let walletAddress = null;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
-    initializeTLDSelector();
-    initializeSearch();
+    // Only initialize features that exist on this page
+    const tldSelector = document.querySelector('.tld-selector');
+    const searchInput = document.getElementById('domain-search');
+    
+    if (tldSelector) {
+        initializeTLDSelector();
+    }
+    
+    if (searchInput) {
+        initializeSearch();
+    }
+    
     initializeWallet();
 });
 

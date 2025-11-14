@@ -1,5 +1,5 @@
 // Marketplace Page Logic
-const MARKETPLACE_FEE_PERCENT = 5; // 5%
+// Constants are imported from solana-utils.js
 
 let allListings = [];
 let filteredListings = [];
@@ -94,7 +94,7 @@ function createListingCard(listing) {
     const card = document.createElement('div');
     card.className = 'listing-card';
     
-    const marketplaceFee = listing.price * (MARKETPLACE_FEE_PERCENT / 100);
+    const marketplaceFee = listing.price * (window.SolanaUtils.MARKETPLACE_FEE_PERCENT / 100);
     const sellerReceives = listing.price - marketplaceFee;
     
     card.innerHTML = `
@@ -123,7 +123,7 @@ function createListingCard(listing) {
             </div>
             <div class="listing-info-item">
                 <span class="listing-info-label">Marketplace Fee</span>
-                <span class="listing-info-value">${marketplaceFee.toFixed(3)} SOL (${MARKETPLACE_FEE_PERCENT}%)</span>
+                <span class="listing-info-value">${marketplaceFee.toFixed(3)} SOL (${window.SolanaUtils.MARKETPLACE_FEE_PERCENT}%)</span>
             </div>
         </div>
         
@@ -152,13 +152,13 @@ async function buyDomain(listing) {
         return;
     }
     
-    const marketplaceFee = listing.price * (MARKETPLACE_FEE_PERCENT / 100);
+    const marketplaceFee = listing.price * (window.SolanaUtils.MARKETPLACE_FEE_PERCENT / 100);
     const sellerReceives = listing.price - marketplaceFee;
     
     const confirmed = confirm(
         `Buy ${listing.name}${listing.tld}?\n\n` +
         `Total Price: ${listing.price} SOL\n` +
-        `Marketplace Fee (${MARKETPLACE_FEE_PERCENT}%): ${marketplaceFee.toFixed(3)} SOL\n` +
+        `Marketplace Fee (${window.SolanaUtils.MARKETPLACE_FEE_PERCENT}%): ${marketplaceFee.toFixed(3)} SOL\n` +
         `Seller Receives: ${sellerReceives.toFixed(3)} SOL\n\n` +
         `From: ${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}\n` +
         `To: ${listing.seller.slice(0, 4)}...${listing.seller.slice(-4)}`
@@ -212,13 +212,13 @@ function viewDomainDetails(name, tld) {
     const listing = allListings.find(l => l.name === name && l.tld === tld);
     if (!listing) return;
     
-    const marketplaceFee = listing.price * (MARKETPLACE_FEE_PERCENT / 100);
+    const marketplaceFee = listing.price * (window.SolanaUtils.MARKETPLACE_FEE_PERCENT / 100);
     const sellerReceives = listing.price - marketplaceFee;
     
     alert(
         `Domain Details: ${name}${tld}\n\n` +
         `Price: ${listing.price} SOL\n` +
-        `Marketplace Fee: ${marketplaceFee.toFixed(3)} SOL (${MARKETPLACE_FEE_PERCENT}%)\n` +
+        `Marketplace Fee: ${marketplaceFee.toFixed(3)} SOL (${window.SolanaUtils.MARKETPLACE_FEE_PERCENT}%)\n` +
         `Seller Receives: ${sellerReceives.toFixed(3)} SOL\n\n` +
         `Seller: ${listing.seller}\n` +
         `Listed: ${formatDate(listing.listedDate)}\n` +

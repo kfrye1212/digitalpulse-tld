@@ -1,6 +1,5 @@
 // My Domains Page Logic
-const RENEWAL_FEE = 0.15; // SOL
-const MARKETPLACE_FEE = 0.05; // 5%
+// Constants are imported from solana-utils.js
 
 document.addEventListener('DOMContentLoaded', () => {
     checkWalletAndLoadDomains();
@@ -115,7 +114,7 @@ function createDomainCard(domain) {
         
         <div class="domain-card-actions">
             <button class="btn-secondary" onclick="renewDomain('${domain.name}', '${domain.tld}')">
-                Renew (${RENEWAL_FEE} SOL)
+                Renew (${window.SolanaUtils.RENEWAL_FEE} SOL)
             </button>
             <button class="btn-secondary" onclick="transferDomain('${domain.name}', '${domain.tld}')">
                 Transfer
@@ -154,7 +153,7 @@ async function renewDomain(name, tld) {
     
     const confirmed = confirm(
         `Renew ${name}${tld} for 1 year?\n\n` +
-        `Renewal Fee: ${RENEWAL_FEE} SOL\n` +
+        `Renewal Fee: ${window.SolanaUtils.RENEWAL_FEE} SOL\n` +
         `Wallet: ${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}`
     );
     
@@ -249,7 +248,7 @@ async function listDomain(name, tld) {
     const price = prompt(
         `List ${name}${tld} for sale\n\n` +
         `Enter price in SOL:\n` +
-        `(Marketplace fee: ${MARKETPLACE_FEE * 100}%)`
+        `(Marketplace fee: ${window.SolanaUtils.MARKETPLACE_FEE_PERCENT/100 * 100}%)`
     );
     
     if (!price) return;
@@ -260,13 +259,13 @@ async function listDomain(name, tld) {
     }
     
     const priceNum = parseFloat(price);
-    const fee = priceNum * MARKETPLACE_FEE;
+    const fee = priceNum * window.SolanaUtils.MARKETPLACE_FEE_PERCENT/100;
     const youReceive = priceNum - fee;
     
     const confirmed = confirm(
         `List ${name}${tld} for ${priceNum} SOL?\n\n` +
         `List Price: ${priceNum} SOL\n` +
-        `Marketplace Fee (${MARKETPLACE_FEE * 100}%): ${fee.toFixed(3)} SOL\n` +
+        `Marketplace Fee (${window.SolanaUtils.MARKETPLACE_FEE_PERCENT/100 * 100}%): ${fee.toFixed(3)} SOL\n` +
         `You Receive: ${youReceive.toFixed(3)} SOL`
     );
     
