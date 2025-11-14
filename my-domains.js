@@ -47,35 +47,14 @@ async function loadUserDomains() {
 }
 
 async function fetchUserDomains(walletAddress) {
-    // TODO: Implement actual Solana program call
-    // This is demo data for now
-    
+    // Use Solana utilities to fetch user domains from blockchain
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 500));
     
-    // Demo domains (replace with actual blockchain query)
-    const demoDomains = [
-        {
-            name: 'myname',
-            tld: '.pulse',
-            registeredDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-            expiryDate: new Date(Date.now() + 335 * 24 * 60 * 60 * 1000),
-            isListed: false,
-            listPrice: null,
-            nftMint: 'ABC123...'
-        },
-        {
-            name: 'crypto',
-            tld: '.verse',
-            registeredDate: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000),
-            expiryDate: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000),
-            isListed: true,
-            listPrice: 5.0,
-            nftMint: 'DEF456...'
-        }
-    ];
+    // Fetch from blockchain (currently uses localStorage for demo)
+    const domains = await window.SolanaUtils.fetchUserDomains(walletAddress);
     
-    return demoDomains;
+    return domains;
 }
 
 function displayDomains(domains) {
@@ -179,11 +158,29 @@ async function renewDomain(name, tld) {
         `Wallet: ${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}`
     );
     
-    if (confirmed) {
-        // TODO: Implement actual Solana transaction
-        alert('Renewal transaction initiated! Smart contract integration in progress.');
-        // After successful renewal, reload domains
-        // await loadUserDomains();
+    if (!confirmed) return;
+    
+    try {
+        // Get wallet public key
+        const provider = window.solana;
+        const publicKey = provider.publicKey;
+        
+        alert('Processing renewal transaction...');
+        
+        // Renew domain using Solana utilities
+        const result = await window.SolanaUtils.renewDomain(name, tld, publicKey);
+        
+        if (result.success) {
+            alert(`✅ ${result.message}\n\nTransaction: ${result.signature}`);
+            
+            // Reload domains to reflect the renewal
+            await loadUserDomains();
+        } else {
+            alert(`❌ Renewal failed:\n${result.error}`);
+        }
+    } catch (error) {
+        console.error('Renewal error:', error);
+        alert(`❌ Renewal failed:\n${error.message}`);
     }
 }
 
@@ -198,22 +195,48 @@ async function transferDomain(name, tld) {
         `Enter recipient's Solana wallet address:`
     );
     
-    if (recipientAddress && recipientAddress.length > 30) {
-        const confirmed = confirm(
-            `Transfer ${name}${tld}?\n\n` +
-            `To: ${recipientAddress.slice(0, 4)}...${recipientAddress.slice(-4)}\n` +
-            `From: ${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}\n\n` +
-            `This action cannot be undone!`
-        );
-        
-        if (confirmed) {
-            // TODO: Implement actual Solana NFT transfer
-            alert('Transfer transaction initiated! Smart contract integration in progress.');
-            // After successful transfer, reload domains
-            // await loadUserDomains();
-        }
-    } else if (recipientAddress) {
+    if (!recipientAddress) return;
+    
+    if (recipientAddress.length < 32 || recipientAddress.length > 44) {
         alert('Invalid wallet address. Please enter a valid Solana address.');
+        return;
+    }
+    
+    const confirmed = confirm(
+        `Transfer ${name}${tld}?\n\n` +
+        `To: ${recipientAddress.slice(0, 4)}...${recipientAddress.slice(-4)}\n` +
+        `From: ${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}\n\n` +
+        `This action cannot be undone!`
+    );
+    
+    if (!confirmed) return;
+    
+    try {
+        // Get wallet public key
+        const provider = window.solana;
+        const publicKey = provider.publicKey;
+        
+        alert('Processing transfer transaction...');
+        
+        // Transfer domain using Solana utilities
+        const result = await window.SolanaUtils.transferDomain(name, tld, recipientAddress, publicKey);
+        
+        if (result.success) {
+            alert(
+                `✅ ${result.message}\n\n` +
+                `Transaction: ${result.signature}\n` +
+                `Domain: ${result.domain}\n` +
+                `Recipient: ${result.recipient.slice(0, 4)}...${result.recipient.slice(-4)}`
+            );
+            
+            // Reload domains to reflect the transfer
+            await loadUserDomains();
+        } else {
+            alert(`❌ Transfer failed:\n${result.error}`);
+        }
+    } catch (error) {
+        console.error('Transfer error:', error);
+        alert(`❌ Transfer failed:\n${error.message}`);
     }
 }
 
@@ -229,26 +252,47 @@ async function listDomain(name, tld) {
         `(Marketplace fee: ${MARKETPLACE_FEE * 100}%)`
     );
     
-    if (price && !isNaN(price) && parseFloat(price) > 0) {
-        const priceNum = parseFloat(price);
-        const fee = priceNum * MARKETPLACE_FEE;
-        const youReceive = priceNum - fee;
-        
-        const confirmed = confirm(
-            `List ${name}${tld} for ${priceNum} SOL?\n\n` +
-            `List Price: ${priceNum} SOL\n` +
-            `Marketplace Fee (${MARKETPLACE_FEE * 100}%): ${fee.toFixed(3)} SOL\n` +
-            `You Receive: ${youReceive.toFixed(3)} SOL`
-        );
-        
-        if (confirmed) {
-            // TODO: Implement actual marketplace listing
-            alert('Listing transaction initiated! Smart contract integration in progress.');
-            // After successful listing, reload domains
-            // await loadUserDomains();
-        }
-    } else if (price) {
+    if (!price) return;
+    
+    if (isNaN(price) || parseFloat(price) <= 0) {
         alert('Invalid price. Please enter a valid number.');
+        return;
+    }
+    
+    const priceNum = parseFloat(price);
+    const fee = priceNum * MARKETPLACE_FEE;
+    const youReceive = priceNum - fee;
+    
+    const confirmed = confirm(
+        `List ${name}${tld} for ${priceNum} SOL?\n\n` +
+        `List Price: ${priceNum} SOL\n` +
+        `Marketplace Fee (${MARKETPLACE_FEE * 100}%): ${fee.toFixed(3)} SOL\n` +
+        `You Receive: ${youReceive.toFixed(3)} SOL`
+    );
+    
+    if (!confirmed) return;
+    
+    try {
+        // Get wallet public key
+        const provider = window.solana;
+        const publicKey = provider.publicKey;
+        
+        alert('Processing listing transaction...');
+        
+        // List domain using Solana utilities
+        const result = await window.SolanaUtils.listDomainForSale(name, tld, priceNum, publicKey);
+        
+        if (result.success) {
+            alert(`✅ ${result.message}\n\nDomain: ${result.domain}\nPrice: ${result.price} SOL`);
+            
+            // Reload domains to reflect the listing
+            await loadUserDomains();
+        } else {
+            alert(`❌ Listing failed:\n${result.error}`);
+        }
+    } catch (error) {
+        console.error('Listing error:', error);
+        alert(`❌ Listing failed:\n${error.message}`);
     }
 }
 
@@ -262,11 +306,29 @@ async function unlistDomain(name, tld) {
         `Remove ${name}${tld} from marketplace?`
     );
     
-    if (confirmed) {
-        // TODO: Implement actual marketplace unlisting
-        alert('Unlisting transaction initiated! Smart contract integration in progress.');
-        // After successful unlisting, reload domains
-        // await loadUserDomains();
+    if (!confirmed) return;
+    
+    try {
+        // Get wallet public key
+        const provider = window.solana;
+        const publicKey = provider.publicKey;
+        
+        alert('Processing unlisting transaction...');
+        
+        // Unlist domain using Solana utilities
+        const result = await window.SolanaUtils.unlistDomain(name, tld, publicKey);
+        
+        if (result.success) {
+            alert(`✅ ${result.message}\n\nDomain: ${result.domain}`);
+            
+            // Reload domains to reflect the unlisting
+            await loadUserDomains();
+        } else {
+            alert(`❌ Unlisting failed:\n${result.error}`);
+        }
+    } catch (error) {
+        console.error('Unlisting error:', error);
+        alert(`❌ Unlisting failed:\n${error.message}`);
     }
 }
 

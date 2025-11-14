@@ -17,62 +17,14 @@ async function loadMarketplaceListings() {
 }
 
 async function fetchMarketplaceListings() {
-    // TODO: Implement actual Solana program call
-    // This is demo data for now
-    
+    // Use Solana utilities to fetch marketplace listings
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 800));
     
-    // Demo listings (replace with actual blockchain query)
-    const demoListings = [
-        {
-            name: 'crypto',
-            tld: '.verse',
-            price: 5.0,
-            seller: 'ABC123...XYZ789',
-            listedDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-            expiryDate: new Date(Date.now() + 320 * 24 * 60 * 60 * 1000),
-            nftMint: 'DEF456...'
-        },
-        {
-            name: 'web3',
-            tld: '.pulse',
-            price: 10.5,
-            seller: 'GHI789...MNO012',
-            listedDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-            expiryDate: new Date(Date.now() + 350 * 24 * 60 * 60 * 1000),
-            nftMint: 'GHI789...'
-        },
-        {
-            name: 'defi',
-            tld: '.cp',
-            price: 2.5,
-            seller: 'JKL012...PQR345',
-            listedDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-            expiryDate: new Date(Date.now() + 280 * 24 * 60 * 60 * 1000),
-            nftMint: 'JKL012...'
-        },
-        {
-            name: 'nft',
-            tld: '.pv',
-            price: 8.0,
-            seller: 'STU345...VWX678',
-            listedDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-            expiryDate: new Date(Date.now() + 300 * 24 * 60 * 60 * 1000),
-            nftMint: 'STU345...'
-        },
-        {
-            name: 'dao',
-            tld: '.pulse',
-            price: 0.8,
-            seller: 'YZA678...BCD901',
-            listedDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-            expiryDate: new Date(Date.now() + 340 * 24 * 60 * 60 * 1000),
-            nftMint: 'YZA678...'
-        }
-    ];
+    // Fetch from blockchain (currently returns demo data with localStorage support)
+    const listings = await window.SolanaUtils.fetchMarketplaceListings();
     
-    return demoListings;
+    return listings;
 }
 
 function applyFilters() {
@@ -212,26 +164,47 @@ async function buyDomain(listing) {
         `To: ${listing.seller.slice(0, 4)}...${listing.seller.slice(-4)}`
     );
     
-    if (confirmed) {
-        // TODO: Implement actual Solana marketplace purchase transaction
-        // This should:
-        // 1. Transfer SOL from buyer to seller (minus marketplace fee)
-        // 2. Transfer marketplace fee to platform wallet
-        // 3. Transfer NFT ownership from seller to buyer
-        // 4. Remove listing from marketplace
+    if (!confirmed) return;
+    
+    try {
+        // Get wallet public key
+        const provider = window.solana;
+        const publicKey = provider.publicKey;
         
-        alert(
-            'Purchase transaction initiated!\n\n' +
-            'Smart contract integration in progress.\n\n' +
-            'Transaction will:\n' +
-            `- Transfer ${listing.price} SOL from your wallet\n` +
-            `- Send ${sellerReceives.toFixed(3)} SOL to seller\n` +
-            `- Send ${marketplaceFee.toFixed(3)} SOL marketplace fee\n` +
-            `- Transfer ${listing.name}${listing.tld} NFT to you`
-        );
+        // Show loading state
+        alert('Processing purchase transaction...');
         
-        // After successful purchase, reload marketplace
-        // await loadMarketplaceListings();
+        // Buy domain using Solana utilities
+        const result = await window.SolanaUtils.buyDomainFromMarketplace(listing, publicKey);
+        
+        if (result.success) {
+            alert(
+                `✅ ${result.message}\n\n` +
+                `Transaction: ${result.signature}\n` +
+                `Domain: ${result.domain}\n` +
+                `Price: ${result.price} SOL`
+            );
+            
+            // Save domain to buyer's collection
+            const domain = {
+                name: listing.name,
+                tld: listing.tld,
+                registeredDate: new Date().toISOString(),
+                expiryDate: listing.expiryDate.toISOString(),
+                isListed: false,
+                listPrice: null,
+                nftMint: listing.nftMint
+            };
+            window.SolanaUtils.saveDomainLocally(domain, walletAddress);
+            
+            // Reload marketplace to reflect the purchase
+            await loadMarketplaceListings();
+        } else {
+            alert(`❌ Purchase failed:\n${result.error}`);
+        }
+    } catch (error) {
+        console.error('Purchase error:', error);
+        alert(`❌ Purchase failed:\n${error.message}`);
     }
 }
 
