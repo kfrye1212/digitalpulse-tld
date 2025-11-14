@@ -2,12 +2,12 @@
 const RENEWAL_FEE = 0.15; // SOL
 const MARKETPLACE_FEE = 0.05; // 5%
 
-let solanaConnection = null;
+let myDomainsSolanaConnection = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
     // Initialize Solana connection
     try {
-        solanaConnection = await createSolanaConnection();
+        myDomainsSolanaConnection = await createSolanaConnection();
         console.log('My Domains connected to Solana:', getSolanaConfig().network);
     } catch (error) {
         console.error('Failed to connect to Solana:', error);

@@ -43,6 +43,11 @@ function initializeSearch() {
     const searchInput = document.getElementById('domain-search');
     const searchBtn = document.getElementById('search-btn');
     
+    // Check if search elements exist on this page
+    if (!searchInput || !searchBtn) {
+        return;
+    }
+    
     searchBtn.addEventListener('click', performSearch);
     
     searchInput.addEventListener('keypress', (e) => {
