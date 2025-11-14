@@ -17,62 +17,8 @@ async function loadMarketplaceListings() {
 }
 
 async function fetchMarketplaceListings() {
-    // TODO: Implement actual Solana program call
-    // This is demo data for now
-    
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    // Demo listings (replace with actual blockchain query)
-    const demoListings = [
-        {
-            name: 'crypto',
-            tld: '.verse',
-            price: 5.0,
-            seller: 'ABC123...XYZ789',
-            listedDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-            expiryDate: new Date(Date.now() + 320 * 24 * 60 * 60 * 1000),
-            nftMint: 'DEF456...'
-        },
-        {
-            name: 'web3',
-            tld: '.pulse',
-            price: 10.5,
-            seller: 'GHI789...MNO012',
-            listedDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-            expiryDate: new Date(Date.now() + 350 * 24 * 60 * 60 * 1000),
-            nftMint: 'GHI789...'
-        },
-        {
-            name: 'defi',
-            tld: '.cp',
-            price: 2.5,
-            seller: 'JKL012...PQR345',
-            listedDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-            expiryDate: new Date(Date.now() + 280 * 24 * 60 * 60 * 1000),
-            nftMint: 'JKL012...'
-        },
-        {
-            name: 'nft',
-            tld: '.pv',
-            price: 8.0,
-            seller: 'STU345...VWX678',
-            listedDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-            expiryDate: new Date(Date.now() + 300 * 24 * 60 * 60 * 1000),
-            nftMint: 'STU345...'
-        },
-        {
-            name: 'dao',
-            tld: '.pulse',
-            price: 0.8,
-            seller: 'YZA678...BCD901',
-            listedDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-            expiryDate: new Date(Date.now() + 340 * 24 * 60 * 60 * 1000),
-            nftMint: 'YZA678...'
-        }
-    ];
-    
-    return demoListings;
+    // Fetch actual marketplace listings from blockchain
+    return await solanaContract.getMarketplaceListings();
 }
 
 function applyFilters() {
@@ -209,29 +155,59 @@ async function buyDomain(listing) {
         `Marketplace Fee (${MARKETPLACE_FEE_PERCENT}%): ${marketplaceFee.toFixed(3)} SOL\n` +
         `Seller Receives: ${sellerReceives.toFixed(3)} SOL\n\n` +
         `From: ${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}\n` +
-        `To: ${listing.seller.slice(0, 4)}...${listing.seller.slice(-4)}`
+        `To: ${listing.seller.slice(0, 4)}...${listing.seller.slice(-4)}\n\n` +
+        `This will create a transaction on Solana blockchain.`
     );
     
     if (confirmed) {
-        // TODO: Implement actual Solana marketplace purchase transaction
-        // This should:
-        // 1. Transfer SOL from buyer to seller (minus marketplace fee)
-        // 2. Transfer marketplace fee to platform wallet
-        // 3. Transfer NFT ownership from seller to buyer
-        // 4. Remove listing from marketplace
-        
-        alert(
-            'Purchase transaction initiated!\n\n' +
-            'Smart contract integration in progress.\n\n' +
-            'Transaction will:\n' +
-            `- Transfer ${listing.price} SOL from your wallet\n` +
-            `- Send ${sellerReceives.toFixed(3)} SOL to seller\n` +
-            `- Send ${marketplaceFee.toFixed(3)} SOL marketplace fee\n` +
-            `- Transfer ${listing.name}${listing.tld} NFT to you`
-        );
-        
-        // After successful purchase, reload marketplace
-        // await loadMarketplaceListings();
+        try {
+            // Show processing state
+            const container = document.getElementById('listings-container');
+            const processingMsg = document.createElement('div');
+            processingMsg.className = 'card-glass';
+            processingMsg.style.cssText = 'text-align: center; padding: 32px; margin-top: 20px;';
+            processingMsg.innerHTML = `
+                <p style="color: rgba(255, 255, 255, 0.8); margin-bottom: 12px;">
+                    🔄 Processing purchase for ${listing.name}${listing.tld}...
+                </p>
+                <p style="color: rgba(255, 255, 255, 0.6); font-size: 14px;">
+                    Please approve the transaction in your wallet
+                </p>
+            `;
+            container.appendChild(processingMsg);
+
+            // Execute blockchain transaction
+            const result = await solanaContract.buyDomainFromMarketplace(listing);
+            
+            if (result.success) {
+                processingMsg.innerHTML = `
+                    <p style="color: #00ff88; margin-bottom: 12px; font-size: 18px;">
+                        ✅ Domain Purchased Successfully!
+                    </p>
+                    <p style="color: rgba(255, 255, 255, 0.8); margin-bottom: 8px;">
+                        ${listing.name}${listing.tld}
+                    </p>
+                    <p style="color: rgba(255, 255, 255, 0.6); font-size: 14px; margin-bottom: 12px;">
+                        Transaction: ${result.signature.slice(0, 8)}...${result.signature.slice(-8)}
+                    </p>
+                    <a href="my-domains.html" class="btn-primary" style="display: inline-block; margin-top: 12px;">
+                        View My Domains
+                    </a>
+                `;
+                
+                // Reload marketplace after purchase
+                setTimeout(() => {
+                    loadMarketplaceListings();
+                }, 3000);
+            }
+        } catch (error) {
+            console.error('Purchase failed:', error);
+            alert(
+                'Purchase failed!\n\n' +
+                'Error: ' + (error.message || 'Unknown error') + '\n\n' +
+                'Please make sure you have enough SOL in your wallet and try again.'
+            );
+        }
     }
 }
 

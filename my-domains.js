@@ -47,35 +47,8 @@ async function loadUserDomains() {
 }
 
 async function fetchUserDomains(walletAddress) {
-    // TODO: Implement actual Solana program call
-    // This is demo data for now
-    
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    // Demo domains (replace with actual blockchain query)
-    const demoDomains = [
-        {
-            name: 'myname',
-            tld: '.pulse',
-            registeredDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-            expiryDate: new Date(Date.now() + 335 * 24 * 60 * 60 * 1000),
-            isListed: false,
-            listPrice: null,
-            nftMint: 'ABC123...'
-        },
-        {
-            name: 'crypto',
-            tld: '.verse',
-            registeredDate: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000),
-            expiryDate: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000),
-            isListed: true,
-            listPrice: 5.0,
-            nftMint: 'DEF456...'
-        }
-    ];
-    
-    return demoDomains;
+    // Fetch user's domains from blockchain
+    return await solanaContract.getUserDomains(walletAddress);
 }
 
 function displayDomains(domains) {
@@ -176,14 +149,31 @@ async function renewDomain(name, tld) {
     const confirmed = confirm(
         `Renew ${name}${tld} for 1 year?\n\n` +
         `Renewal Fee: ${RENEWAL_FEE} SOL\n` +
-        `Wallet: ${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}`
+        `Wallet: ${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}\n\n` +
+        `This will create a transaction on Solana blockchain.`
     );
     
     if (confirmed) {
-        // TODO: Implement actual Solana transaction
-        alert('Renewal transaction initiated! Smart contract integration in progress.');
-        // After successful renewal, reload domains
-        // await loadUserDomains();
+        try {
+            const result = await solanaContract.renewDomain(name, tld, RENEWAL_FEE);
+            
+            if (result.success) {
+                alert(
+                    `✅ Domain Renewed Successfully!\n\n` +
+                    `${name}${tld}\n` +
+                    `Transaction: ${result.signature.slice(0, 8)}...${result.signature.slice(-8)}`
+                );
+                // Reload domains
+                await loadUserDomains();
+            }
+        } catch (error) {
+            console.error('Renewal failed:', error);
+            alert(
+                'Renewal failed!\n\n' +
+                'Error: ' + (error.message || 'Unknown error') + '\n\n' +
+                'Please make sure you have enough SOL in your wallet and try again.'
+            );
+        }
     }
 }
 
@@ -203,14 +193,32 @@ async function transferDomain(name, tld) {
             `Transfer ${name}${tld}?\n\n` +
             `To: ${recipientAddress.slice(0, 4)}...${recipientAddress.slice(-4)}\n` +
             `From: ${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}\n\n` +
-            `This action cannot be undone!`
+            `This action cannot be undone!\n` +
+            `This will create a transaction on Solana blockchain.`
         );
         
         if (confirmed) {
-            // TODO: Implement actual Solana NFT transfer
-            alert('Transfer transaction initiated! Smart contract integration in progress.');
-            // After successful transfer, reload domains
-            // await loadUserDomains();
+            try {
+                const result = await solanaContract.transferDomain(name, tld, recipientAddress);
+                
+                if (result.success) {
+                    alert(
+                        `✅ Domain Transferred Successfully!\n\n` +
+                        `${name}${tld}\n` +
+                        `To: ${recipientAddress.slice(0, 8)}...${recipientAddress.slice(-8)}\n` +
+                        `Transaction: ${result.signature.slice(0, 8)}...${result.signature.slice(-8)}`
+                    );
+                    // Reload domains
+                    await loadUserDomains();
+                }
+            } catch (error) {
+                console.error('Transfer failed:', error);
+                alert(
+                    'Transfer failed!\n\n' +
+                    'Error: ' + (error.message || 'Unknown error') + '\n\n' +
+                    'Please check the recipient address and try again.'
+                );
+            }
         }
     } else if (recipientAddress) {
         alert('Invalid wallet address. Please enter a valid Solana address.');
@@ -238,14 +246,32 @@ async function listDomain(name, tld) {
             `List ${name}${tld} for ${priceNum} SOL?\n\n` +
             `List Price: ${priceNum} SOL\n` +
             `Marketplace Fee (${MARKETPLACE_FEE * 100}%): ${fee.toFixed(3)} SOL\n` +
-            `You Receive: ${youReceive.toFixed(3)} SOL`
+            `You Receive: ${youReceive.toFixed(3)} SOL\n\n` +
+            `This will create a transaction on Solana blockchain.`
         );
         
         if (confirmed) {
-            // TODO: Implement actual marketplace listing
-            alert('Listing transaction initiated! Smart contract integration in progress.');
-            // After successful listing, reload domains
-            // await loadUserDomains();
+            try {
+                const result = await solanaContract.listDomainForSale(name, tld, priceNum);
+                
+                if (result.success) {
+                    alert(
+                        `✅ Domain Listed Successfully!\n\n` +
+                        `${name}${tld}\n` +
+                        `Price: ${priceNum} SOL\n` +
+                        `Transaction: ${result.signature.slice(0, 8)}...${result.signature.slice(-8)}`
+                    );
+                    // Reload domains
+                    await loadUserDomains();
+                }
+            } catch (error) {
+                console.error('Listing failed:', error);
+                alert(
+                    'Listing failed!\n\n' +
+                    'Error: ' + (error.message || 'Unknown error') + '\n\n' +
+                    'Please try again.'
+                );
+            }
         }
     } else if (price) {
         alert('Invalid price. Please enter a valid number.');
@@ -259,14 +285,30 @@ async function unlistDomain(name, tld) {
     }
     
     const confirmed = confirm(
-        `Remove ${name}${tld} from marketplace?`
+        `Remove ${name}${tld} from marketplace?\n\n` +
+        `This will create a transaction on Solana blockchain.`
     );
     
     if (confirmed) {
-        // TODO: Implement actual marketplace unlisting
-        alert('Unlisting transaction initiated! Smart contract integration in progress.');
-        // After successful unlisting, reload domains
-        // await loadUserDomains();
+        try {
+            const result = await solanaContract.unlistDomain(name, tld);
+            
+            if (result.success) {
+                alert(
+                    `✅ Domain Unlisted Successfully!\n\n` +
+                    `${name}${tld} has been removed from the marketplace.`
+                );
+                // Reload domains
+                await loadUserDomains();
+            }
+        } catch (error) {
+            console.error('Unlisting failed:', error);
+            alert(
+                'Unlisting failed!\n\n' +
+                'Error: ' + (error.message || 'Unknown error') + '\n\n' +
+                'Please try again.'
+            );
+        }
     }
 }
 
