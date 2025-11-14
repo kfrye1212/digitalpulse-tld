@@ -2,12 +2,27 @@
 const TLDS = ['.pulse', '.verse', '.cp', '.pv'];
 let selectedTLD = 'all';
 let walletAddress = null;
+let walletProvider = null;
+let solanaConnection = null;
 
 // Initialize
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     initializeTLDSelector();
     initializeSearch();
-    initializeWallet();
+    await initializeWallet();
+    
+    // Initialize Solana connection
+    try {
+        solanaConnection = await createSolanaConnection();
+        if (solanaConnection) {
+            console.log('Connected to Solana:', getSolanaConfig().network);
+        } else {
+            console.log('Running in demo mode without Solana connection');
+        }
+    } catch (error) {
+        console.error('Failed to connect to Solana:', error);
+        console.log('Continuing in demo mode');
+    }
 });
 
 // TLD Selector
@@ -27,6 +42,11 @@ function initializeTLDSelector() {
 function initializeSearch() {
     const searchInput = document.getElementById('domain-search');
     const searchBtn = document.getElementById('search-btn');
+    
+    // Check if search elements exist on this page
+    if (!searchInput || !searchBtn) {
+        return;
+    }
     
     searchBtn.addEventListener('click', performSearch);
     
@@ -114,22 +134,63 @@ function createResultCard(result) {
 }
 
 // Domain Registration
-function registerDomain(name, tld, price) {
-    if (!walletAddress) {
+async function registerDomain(name, tld, price) {
+    if (!walletAddress || !walletProvider) {
         alert('Please connect your wallet first!');
         return;
     }
     
-    // TODO: Implement actual Solana transaction
+    const demoMode = !solanaConnection;
+    const networkInfo = demoMode ? 'demo mode' : getSolanaConfig().network;
+    
     const confirmed = confirm(
         `Register ${name}${tld}?\n\n` +
         `Price: ${price} SOL\n` +
-        `Wallet: ${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}\n\n` +
-        `Smart contract integration coming soon!`
+        `Wallet: ${formatWalletAddress(walletAddress)}\n` +
+        `Network: ${networkInfo}\n\n` +
+        `${demoMode ? 'Note: Running in demo mode.\n' : ''}This will simulate a transaction.`
     );
     
-    if (confirmed) {
-        alert('Registration initiated! Smart contract integration in progress.');
+    if (!confirmed) return;
+    
+    // Show loading state
+    const searchBtn = document.getElementById('search-btn');
+    const originalText = searchBtn.textContent;
+    searchBtn.disabled = true;
+    searchBtn.textContent = 'Processing...';
+    
+    try {
+        // Simulate domain registration transaction
+        const result = await simulateDomainRegistration(
+            solanaConnection,
+            walletProvider,
+            name,
+            tld
+        );
+        
+        if (result.success) {
+            const explorerLink = demoMode ? '' : getExplorerLink(result.signature);
+            const explorerText = explorerLink ? `\n\nView on Solana Explorer:\n${explorerLink}` : '';
+            alert(
+                `✅ Domain registered successfully!\n\n` +
+                `Domain: ${result.domain}\n` +
+                `Transaction: ${result.signature.slice(0, 8)}...${explorerText}\n\n` +
+                `Note: This is a ${demoMode ? 'demo' : 'test'} transaction. Full contract integration coming soon.`
+            );
+            console.log('Registration result:', result);
+        } else {
+            throw new Error(result.error);
+        }
+    } catch (error) {
+        console.error('Registration failed:', error);
+        alert(
+            `❌ Registration failed!\n\n` +
+            `Error: ${error.message}\n\n` +
+            `Please ensure you have the necessary setup and try again.`
+        );
+    } finally {
+        searchBtn.disabled = false;
+        searchBtn.textContent = originalText;
     }
 }
 
@@ -137,13 +198,13 @@ function registerDomain(name, tld, price) {
 async function initializeWallet() {
     const walletButtonContainer = document.getElementById('wallet-button-container');
     
-    // Check if Phantom wallet is installed
-    const isPhantomInstalled = window.solana && window.solana.isPhantom;
+    // Get wallet provider
+    walletProvider = getWalletProvider();
     
-    if (!isPhantomInstalled) {
+    if (!walletProvider) {
         walletButtonContainer.innerHTML = `
             <a href="https://phantom.app/" target="_blank" class="btn-secondary">
-                Install Phantom
+                Install Wallet
             </a>
         `;
         return;
@@ -157,46 +218,80 @@ async function initializeWallet() {
     
     walletButtonContainer.appendChild(walletBtn);
     
-    // Check if already connected
+    // Check if already connected (only if trusted)
     try {
-        const response = await window.solana.connect({ onlyIfTrusted: true });
+        const response = await walletProvider.connect({ onlyIfTrusted: true });
         walletAddress = response.publicKey.toString();
         updateWalletButton(walletBtn);
+        console.log('Auto-connected to wallet:', formatWalletAddress(walletAddress));
     } catch (err) {
-        // Not connected yet
+        // Not connected yet or not trusted
+        console.log('Wallet not auto-connected');
     }
 }
 
 async function connectWallet() {
+    if (!walletProvider) {
+        alert('No wallet provider found. Please install Phantom or another Solana wallet.');
+        return;
+    }
+    
     try {
-        const response = await window.solana.connect();
+        const response = await walletProvider.connect();
         walletAddress = response.publicKey.toString();
         
         const walletBtn = document.querySelector('#wallet-button-container button');
         updateWalletButton(walletBtn);
         
-        console.log('Connected to wallet:', walletAddress);
+        console.log('Connected to wallet:', formatWalletAddress(walletAddress));
+        
+        // Check balance if we have a connection
+        if (solanaConnection && typeof solanaWeb3 !== 'undefined') {
+            try {
+                const balance = await solanaConnection.getBalance(response.publicKey);
+                const balanceInSOL = balance / solanaWeb3.LAMPORTS_PER_SOL;
+                console.log('Wallet balance:', balanceInSOL.toFixed(4), 'SOL');
+                
+                if (balanceInSOL < 0.01) {
+                    alert(
+                        `⚠️ Low Balance\n\n` +
+                        `Your wallet has ${balanceInSOL.toFixed(4)} SOL.\n` +
+                        `You may need more SOL for transactions.`
+                    );
+                }
+            } catch (balanceError) {
+                console.log('Could not fetch balance:', balanceError);
+            }
+        }
     } catch (err) {
         console.error('Failed to connect wallet:', err);
-        alert('Failed to connect wallet. Please try again.');
+        if (err.code === 4001) {
+            alert('Connection cancelled. Please try again to connect your wallet.');
+        } else {
+            alert(`Failed to connect wallet: ${err.message}`);
+        }
     }
 }
 
 function updateWalletButton(btn) {
     if (walletAddress) {
-        btn.textContent = `${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}`;
+        btn.textContent = formatWalletAddress(walletAddress);
         btn.onclick = disconnectWallet;
+        btn.title = walletAddress;
     }
 }
 
 async function disconnectWallet() {
+    if (!walletProvider) return;
+    
     try {
-        await window.solana.disconnect();
+        await walletProvider.disconnect();
         walletAddress = null;
         
         const walletBtn = document.querySelector('#wallet-button-container button');
         walletBtn.textContent = 'Connect Wallet';
         walletBtn.onclick = connectWallet;
+        walletBtn.title = '';
         
         console.log('Disconnected wallet');
     } catch (err) {
@@ -205,15 +300,41 @@ async function disconnectWallet() {
 }
 
 // Listen for wallet changes
-if (window.solana) {
-    window.solana.on('connect', (publicKey) => {
-        walletAddress = publicKey.toString();
-        console.log('Wallet connected:', walletAddress);
-    });
-    
-    window.solana.on('disconnect', () => {
-        walletAddress = null;
-        console.log('Wallet disconnected');
-    });
-}
+window.addEventListener('load', () => {
+    const provider = getWalletProvider();
+    if (provider) {
+        provider.on('connect', (publicKey) => {
+            walletAddress = publicKey.toString();
+            console.log('Wallet connected:', formatWalletAddress(walletAddress));
+        });
+        
+        provider.on('disconnect', () => {
+            walletAddress = null;
+            console.log('Wallet disconnected');
+            
+            // Update button if it exists
+            const walletBtn = document.querySelector('#wallet-button-container button');
+            if (walletBtn) {
+                walletBtn.textContent = 'Connect Wallet';
+                walletBtn.onclick = connectWallet;
+                walletBtn.title = '';
+            }
+        });
+        
+        provider.on('accountChanged', (publicKey) => {
+            if (publicKey) {
+                walletAddress = publicKey.toString();
+                console.log('Wallet account changed:', formatWalletAddress(walletAddress));
+                
+                // Update button
+                const walletBtn = document.querySelector('#wallet-button-container button');
+                if (walletBtn) {
+                    updateWalletButton(walletBtn);
+                }
+            } else {
+                walletAddress = null;
+            }
+        });
+    }
+});
 
