@@ -18,7 +18,11 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function checkWalletAndLoadDomains() {
-    if (walletAddress) {
+    // Get wallet address from app.js or check directly
+    const currentWalletAddress = typeof walletAddress !== 'undefined' ? walletAddress : 
+        (window.solana && window.solana.publicKey ? window.solana.publicKey.toString() : null);
+    
+    if (currentWalletAddress) {
         await loadUserDomains();
     } else {
         showConnectPrompt();
@@ -38,9 +42,17 @@ function hideConnectPrompt() {
 async function loadUserDomains() {
     hideConnectPrompt();
     
-    // TODO: Replace with actual smart contract call
-    // For now, simulate with demo data
-    const domains = await fetchUserDomains(walletAddress);
+    // Get wallet address
+    const currentWalletAddress = typeof walletAddress !== 'undefined' ? walletAddress : 
+        (window.solana && window.solana.publicKey ? window.solana.publicKey.toString() : null);
+    
+    if (!currentWalletAddress) {
+        showConnectPrompt();
+        return;
+    }
+    
+    // Fetch user's domains from blockchain
+    const domains = await solanaContract.getUserDomains(currentWalletAddress);
     
     displayDomains(domains);
     updateStats(domains);
@@ -141,7 +153,10 @@ function updateStats(domains) {
 
 // Domain Actions
 async function renewDomain(name, tld) {
-    if (!walletAddress) {
+    const currentWalletAddress = typeof walletAddress !== 'undefined' ? walletAddress : 
+        (window.solana && window.solana.publicKey ? window.solana.publicKey.toString() : null);
+    
+    if (!currentWalletAddress) {
         alert('Please connect your wallet first!');
         return;
     }
@@ -149,7 +164,7 @@ async function renewDomain(name, tld) {
     const confirmed = confirm(
         `Renew ${name}${tld} for 1 year?\n\n` +
         `Renewal Fee: ${RENEWAL_FEE} SOL\n` +
-        `Wallet: ${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}\n\n` +
+        `Wallet: ${currentWalletAddress.slice(0, 4)}...${currentWalletAddress.slice(-4)}\n\n` +
         `This will create a transaction on Solana blockchain.`
     );
     
@@ -178,7 +193,10 @@ async function renewDomain(name, tld) {
 }
 
 async function transferDomain(name, tld) {
-    if (!walletAddress) {
+    const currentWalletAddress = typeof walletAddress !== 'undefined' ? walletAddress : 
+        (window.solana && window.solana.publicKey ? window.solana.publicKey.toString() : null);
+    
+    if (!currentWalletAddress) {
         alert('Please connect your wallet first!');
         return;
     }
@@ -192,7 +210,7 @@ async function transferDomain(name, tld) {
         const confirmed = confirm(
             `Transfer ${name}${tld}?\n\n` +
             `To: ${recipientAddress.slice(0, 4)}...${recipientAddress.slice(-4)}\n` +
-            `From: ${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}\n\n` +
+            `From: ${currentWalletAddress.slice(0, 4)}...${currentWalletAddress.slice(-4)}\n\n` +
             `This action cannot be undone!\n` +
             `This will create a transaction on Solana blockchain.`
         );
@@ -226,7 +244,10 @@ async function transferDomain(name, tld) {
 }
 
 async function listDomain(name, tld) {
-    if (!walletAddress) {
+    const currentWalletAddress = typeof walletAddress !== 'undefined' ? walletAddress : 
+        (window.solana && window.solana.publicKey ? window.solana.publicKey.toString() : null);
+    
+    if (!currentWalletAddress) {
         alert('Please connect your wallet first!');
         return;
     }
@@ -279,7 +300,10 @@ async function listDomain(name, tld) {
 }
 
 async function unlistDomain(name, tld) {
-    if (!walletAddress) {
+    const currentWalletAddress = typeof walletAddress !== 'undefined' ? walletAddress : 
+        (window.solana && window.solana.publicKey ? window.solana.publicKey.toString() : null);
+    
+    if (!currentWalletAddress) {
         alert('Please connect your wallet first!');
         return;
     }

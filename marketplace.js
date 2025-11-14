@@ -135,13 +135,16 @@ function createListingCard(listing) {
 }
 
 async function buyDomain(listing) {
-    if (!walletAddress) {
+    const currentWalletAddress = typeof walletAddress !== 'undefined' ? walletAddress : 
+        (window.solana && window.solana.publicKey ? window.solana.publicKey.toString() : null);
+    
+    if (!currentWalletAddress) {
         alert('Please connect your wallet first!');
         return;
     }
     
     // Check if buyer is the seller
-    if (listing.seller === walletAddress) {
+    if (listing.seller === currentWalletAddress) {
         alert('You cannot buy your own domain!');
         return;
     }
@@ -154,7 +157,7 @@ async function buyDomain(listing) {
         `Total Price: ${listing.price} SOL\n` +
         `Marketplace Fee (${MARKETPLACE_FEE_PERCENT}%): ${marketplaceFee.toFixed(3)} SOL\n` +
         `Seller Receives: ${sellerReceives.toFixed(3)} SOL\n\n` +
-        `From: ${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}\n` +
+        `From: ${currentWalletAddress.slice(0, 4)}...${currentWalletAddress.slice(-4)}\n` +
         `To: ${listing.seller.slice(0, 4)}...${listing.seller.slice(-4)}\n\n` +
         `This will create a transaction on Solana blockchain.`
     );
