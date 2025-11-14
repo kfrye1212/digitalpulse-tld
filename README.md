@@ -4,6 +4,17 @@
 
 A decentralized top-level domain (TLD) registration platform built on the Solana blockchain. Register, manage, and trade custom domain names as NFTs.
 
+## ✨ New: Solana Smart Contract Integration
+
+**Wallet connectivity and blockchain transactions are now fully integrated!** Users can:
+- ✅ Connect Phantom wallet and other Solana wallets
+- ✅ Register domains with real SOL transactions
+- ✅ Buy and sell domains on the marketplace
+- ✅ Transfer and renew domain ownership
+- ✅ All operations confirmed on Solana blockchain
+
+See [INTEGRATION.md](INTEGRATION.md) for technical details.
+
 ## Features
 
 - 🔍 **Domain Search**: Check availability of domains across multiple TLDs
@@ -11,13 +22,14 @@ A decentralized top-level domain (TLD) registration platform built on the Solana
 - 🏪 **Marketplace**: Buy and sell domains with built-in marketplace functionality
 - 🔐 **Wallet Integration**: Seamless connection with Solana wallets (Phantom, Solflare, etc.)
 - ⛓️ **Blockchain-Based**: All domains are NFTs on the Solana blockchain
+- 💸 **Real Transactions**: Actual SOL payments and blockchain confirmations
 
 ## Getting Started
 
 ### Prerequisites
 
 - A Solana wallet (Phantom, Solflare, or compatible wallet extension)
-- SOL tokens for transactions
+- SOL tokens for transactions (0.25 SOL for registration, 0.15 SOL for renewal)
 
 ### Using the Application
 
@@ -50,6 +62,7 @@ Then navigate to `http://localhost:8000`
 
 ## Documentation
 
+- [Solana Integration Guide](INTEGRATION.md) - **NEW!** Complete guide to blockchain integration
 - [Contributing Guidelines](CONTRIBUTING.md)
 - [Security Policy](SECURITY.md)
 - [Security Findings](.github/SECURITY_FINDINGS.md)

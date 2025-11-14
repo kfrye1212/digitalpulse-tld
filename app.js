@@ -5,8 +5,18 @@ let walletAddress = null;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
-    initializeTLDSelector();
-    initializeSearch();
+    // Only initialize features that exist on this page
+    const tldSelector = document.querySelector('.tld-selector');
+    const searchInput = document.getElementById('domain-search');
+    
+    if (tldSelector) {
+        initializeTLDSelector();
+    }
+    
+    if (searchInput) {
+        initializeSearch();
+    }
+    
     initializeWallet();
 });
 
@@ -114,22 +124,57 @@ function createResultCard(result) {
 }
 
 // Domain Registration
-function registerDomain(name, tld, price) {
+async function registerDomain(name, tld, price) {
     if (!walletAddress) {
         alert('Please connect your wallet first!');
         return;
     }
     
-    // TODO: Implement actual Solana transaction
     const confirmed = confirm(
         `Register ${name}${tld}?\n\n` +
         `Price: ${price} SOL\n` +
-        `Wallet: ${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}\n\n` +
-        `Smart contract integration coming soon!`
+        `Wallet: ${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}`
     );
     
-    if (confirmed) {
-        alert('Registration initiated! Smart contract integration in progress.');
+    if (!confirmed) return;
+    
+    // Show loading state
+    const btn = event.target;
+    const originalText = btn.textContent;
+    btn.textContent = 'Processing...';
+    btn.disabled = true;
+    
+    try {
+        // Get wallet public key
+        const provider = window.solana;
+        const publicKey = provider.publicKey;
+        
+        // Register domain using Solana utilities
+        const result = await window.SolanaUtils.registerDomain(name, tld, publicKey);
+        
+        if (result.success) {
+            alert(`✅ ${result.message}\n\nTransaction: ${result.signature}`);
+            
+            // Save domain locally for demo
+            const domain = {
+                name: name,
+                tld: tld,
+                registeredDate: new Date().toISOString(),
+                expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+                isListed: false,
+                listPrice: null,
+                nftMint: result.signature.slice(0, 10) + '...'
+            };
+            window.SolanaUtils.saveDomainLocally(domain, walletAddress);
+        } else {
+            alert(`❌ Registration failed:\n${result.error}`);
+        }
+    } catch (error) {
+        console.error('Registration error:', error);
+        alert(`❌ Registration failed:\n${error.message}`);
+    } finally {
+        btn.textContent = originalText;
+        btn.disabled = false;
     }
 }
 
