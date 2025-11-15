@@ -2,6 +2,7 @@
 const TLDS = ['.pulse', '.verse', '.cp', '.pv'];
 let selectedTLD = 'all';
 let walletAddress = null;
+let walletBalance = 0;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -43,26 +44,54 @@ async function performSearch() {
     
     if (!query) return;
     
+    // Validate domain name
+    if (!validateDomainName(query)) {
+        showNotification('Invalid domain name. Use only lowercase letters, numbers, and hyphens.', 'error');
+        return;
+    }
+    
     const searchBtn = document.getElementById('search-btn');
     searchBtn.disabled = true;
     searchBtn.textContent = 'Searching...';
     
-    // Simulate search delay
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    // Generate results
-    const tldsToSearch = selectedTLD === 'all' ? TLDS : [selectedTLD];
-    const results = tldsToSearch.map(tld => ({
-        name: query,
-        tld: tld,
-        available: Math.random() > 0.3, // Random availability for demo
-        price: 0.25
-    }));
-    
-    displayResults(results);
-    
-    searchBtn.disabled = false;
-    searchBtn.textContent = 'Search';
+    try {
+        // Search on blockchain
+        const tldsToSearch = selectedTLD === 'all' ? ['pulse', 'verse', 'cp', 'pv'] : [selectedTLD.replace('.', '')];
+        const results = [];
+        
+        for (const tld of tldsToSearch) {
+            try {
+                const availability = await blockchainService.checkDomainAvailability(query, tld);
+                results.push({
+                    name: query,
+                    tld: '.' + tld,
+                    tldName: tld,
+                    available: availability.available,
+                    price: formatSOL(REGISTRATION_FEE),
+                    domainData: availability.domain
+                });
+            } catch (error) {
+                console.error(`Error checking ${query}.${tld}:`, error);
+                // Add as potentially available if check fails
+                results.push({
+                    name: query,
+                    tld: '.' + tld,
+                    tldName: tld,
+                    available: true,
+                    price: formatSOL(REGISTRATION_FEE),
+                    domainData: null
+                });
+            }
+        }
+        
+        displayResults(results);
+    } catch (error) {
+        console.error('Search error:', error);
+        showNotification('Search failed. Please try again.', 'error');
+    } finally {
+        searchBtn.disabled = false;
+        searchBtn.textContent = 'Search';
+    }
 }
 
 function displayResults(results) {
@@ -93,18 +122,18 @@ function createResultCard(result) {
             <div class="status-dot ${statusClass}"></div>
             <div>
                 <div class="result-domain">
-                    ${result.name}<span class="text-primary">${result.tld}</span>
+                    ${escapeHtml(result.name)}<span class="text-primary">${escapeHtml(result.tld)}</span>
                 </div>
                 <div class="result-status">${statusText}</div>
             </div>
         </div>
         <div class="result-actions">
             <div class="result-price">
-                <div class="price-value">${result.price} SOL</div>
+                <div class="price-value">${escapeHtml(result.price)} SOL</div>
                 <div class="price-label">Registration fee</div>
             </div>
             ${result.available ? 
-                `<button class="btn-primary" onclick="registerDomain('${result.name}', '${result.tld}', ${result.price})">Register</button>` :
+                `<button class="btn-primary" onclick="registerDomain('${escapeHtml(result.name)}', '${escapeHtml(result.tldName)}', ${result.price})">Register</button>` :
                 `<button class="btn-secondary" disabled>Unavailable</button>`
             }
         </div>
@@ -114,22 +143,42 @@ function createResultCard(result) {
 }
 
 // Domain Registration
-function registerDomain(name, tld, price) {
+async function registerDomain(name, tldName, price) {
     if (!walletAddress) {
-        alert('Please connect your wallet first!');
+        showNotification('Please connect your wallet first!', 'error');
         return;
     }
     
-    // TODO: Implement actual Solana transaction
+    // Check balance
+    if (walletBalance < parseFloat(price)) {
+        showNotification('Insufficient SOL balance for registration.', 'error');
+        return;
+    }
+    
     const confirmed = confirm(
-        `Register ${name}${tld}?\n\n` +
+        `Register ${name}.${tldName}?\n\n` +
         `Price: ${price} SOL\n` +
-        `Wallet: ${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}\n\n` +
-        `Smart contract integration coming soon!`
+        `Wallet: ${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}`
     );
     
-    if (confirmed) {
-        alert('Registration initiated! Smart contract integration in progress.');
+    if (!confirmed) return;
+    
+    try {
+        showLoading('Registering domain...');
+        
+        const result = await blockchainService.registerDomain(name, tldName);
+        
+        hideLoading();
+        showNotification(`Domain ${result.domain} registered successfully!`, 'success');
+        
+        // Refresh search to show updated status
+        setTimeout(() => performSearch(), 2000);
+        
+        // Update balance
+        walletBalance = await blockchainService.getBalance(walletAddress);
+    } catch (error) {
+        hideLoading();
+        handleTransactionError(error);
     }
 }
 
@@ -169,16 +218,27 @@ async function initializeWallet() {
 
 async function connectWallet() {
     try {
+        showLoading('Connecting wallet...');
+        
         const response = await window.solana.connect();
         walletAddress = response.publicKey.toString();
+        
+        // Initialize blockchain service with wallet
+        await blockchainService.connectWallet(window.solana);
+        
+        // Get wallet balance
+        walletBalance = await blockchainService.getBalance(walletAddress);
         
         const walletBtn = document.querySelector('#wallet-button-container button');
         updateWalletButton(walletBtn);
         
+        hideLoading();
+        showNotification('Wallet connected successfully!', 'success');
         console.log('Connected to wallet:', walletAddress);
     } catch (err) {
+        hideLoading();
         console.error('Failed to connect wallet:', err);
-        alert('Failed to connect wallet. Please try again.');
+        showNotification('Failed to connect wallet. Please try again.', 'error');
     }
 }
 

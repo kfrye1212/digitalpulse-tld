@@ -172,8 +172,18 @@
         </div>
     </footer>
 
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner"></div>
+        <div class="loading-message">Processing...</div>
+    </div>
+
     <!-- Scripts -->
     <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+    <script src="https://unpkg.com/@coral-xyz/anchor@0.29.0/dist/browser/index.js"></script>
+    <script src="config.js"></script>
+    <script src="utils.js"></script>
+    <script src="blockchain.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

@@ -1,0 +1,12 @@
+{
+  "name": "DigitalPulse TLD Name Service",
+  "project_url": "https://kfrye1212.github.io/digitalpulse-tld/",
+  "contacts": "email:security@chainpulse.network",
+  "policy": "https://github.com/kfrye1212/digitalpulse-tld/blob/main/SECURITY.md",
+  "preferred_languages": "en",
+  "source_code": "https://github.com/kfrye1212/digitalpulse-tld",
+  "source_release": "v1.0.0",
+  "source_revision": "mainnet-deployment",
+  "auditors": "Self-audited",
+  "acknowledgements": "Built on Solana blockchain with Anchor framework"
+}
