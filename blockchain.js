@@ -124,16 +124,11 @@ class BlockchainService {
             console.log('Fetching domains for owner:', ownerAddress);
             
             // Get all program accounts (domains)
-            // Domain accounts are typically 150-200 bytes
+            // Domain accounts vary in size (70-81 bytes) based on domain name length
             const accounts = await this.connection.getProgramAccounts(
                 this.programId,
                 {
-                    filters: [
-                        {
-                            // Actual domain account size from on-chain data
-                            dataSize: 77
-                        }
-                    ]
+                    filters: []  // Get all accounts, filter by parsing
                 }
             );
 
@@ -286,11 +281,7 @@ class BlockchainService {
             const accounts = await this.connection.getProgramAccounts(
                 this.programId,
                 {
-                    filters: [
-                        {
-                            dataSize: 77 // Actual domain account size
-                        }
-                    ]
+                    filters: []  // Get all accounts, domain sizes vary (70-81 bytes)
                 }
             );
 
