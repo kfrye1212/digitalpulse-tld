@@ -1,0 +1,21 @@
+[package]
+name = "digitalpulse_tld"
+version = "0.2.0"
+description = "Digital Pulse TLD Name Service on Solana with NFT Support"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "digitalpulse_tld"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+anchor-lang = "0.28.0"
+anchor-spl = "0.28.0"
+mpl-token-metadata = "1.13.1"

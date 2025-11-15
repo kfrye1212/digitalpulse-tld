@@ -1,0 +1,79 @@
+═══════════════════════════════════════════════════════════════════════════════
+  DIGITALPULSE TLD - NFT UPGRADE QUICK START
+═══════════════════════════════════════════════════════════════════════════════
+
+📦 STEP 1: Get the Files
+───────────────────────────────────────────────────────────────────────────────
+Download: digitalpulse-tld-nft-upgrade.tar.gz
+
+Extract:
+  tar -xzf digitalpulse-tld-nft-upgrade.tar.gz
+  cd digitalpulse-tld-nft
+
+
+⚙️  STEP 2: Install Prerequisites (if not already installed)
+───────────────────────────────────────────────────────────────────────────────
+Solana CLI:
+  sh -c "$(curl -sSfL https://release.solana.com/stable/install)"
+
+Anchor CLI:
+  cargo install --git https://github.com/coral-xyz/anchor --tag v0.28.0 anchor-cli
+
+Verify:
+  solana --version
+  anchor --version
+
+
+🔑 STEP 3: Configure Your Wallet
+───────────────────────────────────────────────────────────────────────────────
+Set your authority wallet:
+  solana config set --keypair /path/to/your/wallet.json
+
+Verify it's correct:
+  solana address
+  
+Should output: GJUdwrWeFVBZkwVSwjzfnhJMPyGo3hUeQ7ZxmonaWMdH
+
+Check balance (need 3+ SOL):
+  solana balance
+
+
+🚀 STEP 4: Build & Upgrade
+───────────────────────────────────────────────────────────────────────────────
+Build the contract:
+  anchor build
+
+Upgrade on mainnet:
+  solana config set --url mainnet-beta
+  anchor upgrade target/deploy/digitalpulse_tld.so \
+    --program-id 2skfTcCdVRkrVdhrvQ9JTWyccgt9jmuPP2S7iT8RSEcJ \
+    --provider.cluster mainnet
+
+This will cost ~2-3 SOL
+
+
+✅ STEP 5: Verify
+───────────────────────────────────────────────────────────────────────────────
+Check the upgrade:
+  solana program show 2skfTcCdVRkrVdhrvQ9JTWyccgt9jmuPP2S7iT8RSEcJ
+
+Look for recent "Last Deployed Slot"
+
+
+🎮 STEP 6: Test
+───────────────────────────────────────────────────────────────────────────────
+1. Go to: https://www.chainpulse.network
+2. Connect your authority wallet
+3. Register a test domain (e.g., "mynft.pulse")
+4. Check Phantom wallet - you should see the NFT!
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  THAT'S IT! Your contract now mints NFTs for every domain registration.
+═══════════════════════════════════════════════════════════════════════════════
+
+Questions? Check UPGRADE_CONTRACT.md for detailed troubleshooting.
+
+Cost: ~2-3 SOL
+Time: ~10 minutes
+Result: Fully functional NFT domain system with marketplace support!
