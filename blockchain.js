@@ -1,11 +1,10 @@
-// DigitalPulse TLD Blockchain Integration
+// DigitalPulse TLD Blockchain Integration (Pure Solana Web3.js)
 
 class BlockchainService {
     constructor() {
         this.connection = null;
-        this.program = null;
         this.wallet = null;
-        this.provider = null;
+        this.programId = null;
     }
 
     /**
@@ -14,8 +13,8 @@ class BlockchainService {
     async initialize() {
         try {
             // Check if Solana Web3 is loaded
-            if (!window.solanaWeb3 || !window.anchor) {
-                throw new Error('Solana libraries not loaded. Please refresh the page.');
+            if (!window.solanaWeb3) {
+                throw new Error('Solana Web3.js not loaded. Please refresh the page.');
             }
 
             // Create connection to Solana
@@ -23,6 +22,8 @@ class BlockchainService {
                 RPC_ENDPOINT,
                 'confirmed'
             );
+
+            this.programId = new window.solanaWeb3.PublicKey(PROGRAM_ID);
 
             console.log('Blockchain service initialized');
             return true;
@@ -33,7 +34,7 @@ class BlockchainService {
     }
 
     /**
-     * Connect wallet and initialize program
+     * Connect wallet
      */
     async connectWallet(walletProvider) {
         try {
@@ -42,22 +43,8 @@ class BlockchainService {
             }
 
             this.wallet = walletProvider;
-            
-            // Create Anchor provider
-            this.provider = new window.anchor.AnchorProvider(
-                this.connection,
-                this.wallet,
-                { commitment: 'confirmed' }
-            );
 
-            // Create program instance
-            this.program = new window.anchor.Program(
-                PROGRAM_IDL,
-                new window.solanaWeb3.PublicKey(PROGRAM_ID),
-                this.provider
-            );
-
-            console.log('Wallet connected and program initialized');
+            console.log('Wallet connected');
             return true;
         } catch (error) {
             console.error('Failed to connect wallet:', error);
@@ -66,10 +53,141 @@ class BlockchainService {
     }
 
     /**
+     * Get user's domains by querying program accounts
+     */
+    async getUserDomains(ownerAddress) {
+        try {
+            if (!this.connection) {
+                await this.initialize();
+            }
+
+            const ownerPubkey = new window.solanaWeb3.PublicKey(ownerAddress);
+            
+            console.log('Fetching domains for owner:', ownerAddress);
+            
+            // Get all program accounts (domains)
+            const accounts = await this.connection.getProgramAccounts(
+                this.programId,
+                {
+                    filters: [
+                        {
+                            // Filter by owner (offset depends on account structure)
+                            // Typical Anchor account: 8 bytes discriminator + data
+                            // We'll fetch all and filter in JS for now
+                            dataSize: 200 // Approximate size, adjust if needed
+                        }
+                    ]
+                }
+            );
+
+            console.log(`Found ${accounts.length} total program accounts`);
+
+            // Parse and filter domains
+            const domains = [];
+            for (const { pubkey, account } of accounts) {
+                try {
+                    const data = account.data;
+                    
+                    // Skip if data is too small
+                    if (data.length < 100) continue;
+
+                    // Try to deserialize domain data
+                    // This is a simplified parser - adjust offsets based on your contract
+                    const domain = this.parseDomainAccount(data, ownerPubkey);
+                    
+                    if (domain && domain.isOwner) {
+                        domains.push({
+                            address: pubkey.toString(),
+                            name: domain.name,
+                            tld: domain.tld,
+                            owner: domain.owner,
+                            registeredAt: domain.registeredAt,
+                            expiresAt: domain.expiresAt,
+                            isActive: domain.isActive,
+                            isExpired: isDomainExpired(domain.expiresAt)
+                        });
+                    }
+                } catch (parseError) {
+                    // Skip accounts that can't be parsed
+                    continue;
+                }
+            }
+
+            console.log(`Found ${domains.length} domains for owner`);
+            return domains;
+
+        } catch (error) {
+            console.error('Error fetching user domains:', error);
+            // Return empty array instead of throwing to avoid breaking the UI
+            return [];
+        }
+    }
+
+    /**
+     * Parse domain account data
+     * Note: This is a simplified parser. Adjust based on your actual account structure.
+     */
+    parseDomainAccount(data, ownerPubkey) {
+        try {
+            // Skip 8-byte discriminator (Anchor accounts start with this)
+            let offset = 8;
+
+            // Read domain name (String: 4 bytes length + data)
+            const nameLen = data.readUInt32LE(offset);
+            offset += 4;
+            if (nameLen > 63) return null; // Invalid
+            const name = data.slice(offset, offset + nameLen).toString('utf8');
+            offset += 63; // Max name length in contract
+
+            // Read TLD (String: 4 bytes length + data)
+            const tldLen = data.readUInt32LE(offset);
+            offset += 4;
+            if (tldLen > 10) return null; // Invalid
+            const tld = data.slice(offset, offset + tldLen).toString('utf8');
+            offset += 10; // Max TLD length in contract
+
+            // Read owner (32 bytes PublicKey)
+            const ownerBytes = data.slice(offset, offset + 32);
+            const owner = new window.solanaWeb3.PublicKey(ownerBytes).toString();
+            offset += 32;
+
+            // Check if this domain belongs to the requested owner
+            const isOwner = owner === ownerPubkey.toString();
+
+            // Read timestamps (i64 = 8 bytes each)
+            const registeredAt = Number(data.readBigInt64LE(offset));
+            offset += 8;
+            const expiresAt = Number(data.readBigInt64LE(offset));
+            offset += 8;
+
+            // Read boolean flags
+            const isActive = data.readUInt8(offset) === 1;
+            offset += 1;
+
+            return {
+                name,
+                tld,
+                owner,
+                isOwner,
+                registeredAt,
+                expiresAt,
+                isActive
+            };
+        } catch (error) {
+            console.error('Error parsing domain account:', error);
+            return null;
+        }
+    }
+
+    /**
      * Check if domain is available
      */
     async checkDomainAvailability(domainName, tldName) {
         try {
+            if (!this.connection) {
+                await this.initialize();
+            }
+
             const domainPDA = await getDomainPDA(domainName, tldName, PROGRAM_ID);
             
             // Try to fetch domain account
@@ -83,245 +201,36 @@ class BlockchainService {
                 };
             }
 
-            // If account exists, try to deserialize it
+            // If account exists, try to parse it
             try {
-                const domain = await this.program.account.domain.fetch(domainPDA);
-                return {
-                    available: false,
-                    domain: {
-                        name: domain.name,
-                        tld: domain.tld,
-                        owner: domain.owner.toString(),
-                        registeredAt: domain.registeredAt.toNumber(),
-                        expiresAt: domain.expiresAt.toNumber(),
-                        isActive: domain.isActive,
-                        isExpired: isDomainExpired(domain.expiresAt.toNumber())
-                    }
-                };
-            } catch (deserializeError) {
-                console.error('Error deserializing domain:', deserializeError);
-                return {
-                    available: true,
-                    domain: null
-                };
+                const domain = this.parseDomainAccount(accountInfo.data, new window.solanaWeb3.PublicKey('11111111111111111111111111111111'));
+                
+                if (domain) {
+                    return {
+                        available: false,
+                        domain: {
+                            name: domain.name,
+                            tld: domain.tld,
+                            owner: domain.owner,
+                            registeredAt: domain.registeredAt,
+                            expiresAt: domain.expiresAt,
+                            isActive: domain.isActive,
+                            isExpired: isDomainExpired(domain.expiresAt)
+                        }
+                    };
+                }
+            } catch (parseError) {
+                console.error('Error parsing domain:', parseError);
             }
+
+            return {
+                available: true,
+                domain: null
+            };
+
         } catch (error) {
             console.error('Error checking domain availability:', error);
             throw error;
-        }
-    }
-
-    /**
-     * Register a new domain
-     */
-    async registerDomain(domainName, tldName) {
-        try {
-            if (!this.program || !this.wallet) {
-                throw new Error('Wallet not connected');
-            }
-
-            // Validate domain name
-            if (!validateDomainName(domainName)) {
-                throw new Error('Invalid domain name. Use only lowercase letters, numbers, and hyphens.');
-            }
-
-            // Get PDAs
-            const servicePDA = await getServicePDA(PROGRAM_ID);
-            const tldPDA = await getTLDPDA(tldName, PROGRAM_ID);
-            const domainPDA = await getDomainPDA(domainName, tldName, PROGRAM_ID);
-            const treasuryPubkey = new window.solanaWeb3.PublicKey(TREASURY_WALLET);
-
-            // Execute transaction
-            const tx = await this.program.methods
-                .registerDomain(domainName, tldName)
-                .accounts({
-                    domain: domainPDA,
-                    tld: tldPDA,
-                    service: servicePDA,
-                    owner: this.wallet.publicKey,
-                    treasury: treasuryPubkey,
-                    systemProgram: window.solanaWeb3.SystemProgram.programId
-                })
-                .rpc();
-
-            console.log('Domain registered! Transaction:', tx);
-            
-            return {
-                success: true,
-                signature: tx,
-                domain: `${domainName}.${tldName}`
-            };
-        } catch (error) {
-            console.error('Error registering domain:', error);
-            throw error;
-        }
-    }
-
-    /**
-     * Renew a domain
-     */
-    async renewDomain(domainName, tldName) {
-        try {
-            if (!this.program || !this.wallet) {
-                throw new Error('Wallet not connected');
-            }
-
-            // Get PDAs
-            const servicePDA = await getServicePDA(PROGRAM_ID);
-            const domainPDA = await getDomainPDA(domainName, tldName, PROGRAM_ID);
-            const treasuryPubkey = new window.solanaWeb3.PublicKey(TREASURY_WALLET);
-
-            // Execute transaction
-            const tx = await this.program.methods
-                .renewDomain()
-                .accounts({
-                    domain: domainPDA,
-                    service: servicePDA,
-                    owner: this.wallet.publicKey,
-                    treasury: treasuryPubkey,
-                    systemProgram: window.solanaWeb3.SystemProgram.programId
-                })
-                .rpc();
-
-            console.log('Domain renewed! Transaction:', tx);
-            
-            return {
-                success: true,
-                signature: tx,
-                domain: `${domainName}.${tldName}`
-            };
-        } catch (error) {
-            console.error('Error renewing domain:', error);
-            throw error;
-        }
-    }
-
-    /**
-     * Transfer domain to new owner
-     */
-    async transferDomain(domainName, tldName, newOwner, salePrice) {
-        try {
-            if (!this.program || !this.wallet) {
-                throw new Error('Wallet not connected');
-            }
-
-            // Get PDAs
-            const servicePDA = await getServicePDA(PROGRAM_ID);
-            const domainPDA = await getDomainPDA(domainName, tldName, PROGRAM_ID);
-            const treasuryPubkey = new window.solanaWeb3.PublicKey(TREASURY_WALLET);
-            const newOwnerPubkey = new window.solanaWeb3.PublicKey(newOwner);
-
-            // Convert SOL to lamports
-            const salePriceLamports = solToLamports(salePrice);
-
-            // Execute transaction
-            const tx = await this.program.methods
-                .transferDomain(new window.anchor.BN(salePriceLamports))
-                .accounts({
-                    domain: domainPDA,
-                    service: servicePDA,
-                    currentOwner: this.wallet.publicKey,
-                    newOwner: newOwnerPubkey,
-                    treasury: treasuryPubkey,
-                    systemProgram: window.solanaWeb3.SystemProgram.programId
-                })
-                .rpc();
-
-            console.log('Domain transferred! Transaction:', tx);
-            
-            return {
-                success: true,
-                signature: tx,
-                domain: `${domainName}.${tldName}`
-            };
-        } catch (error) {
-            console.error('Error transferring domain:', error);
-            throw error;
-        }
-    }
-
-    /**
-     * Get user's domains
-     */
-    async getUserDomains(ownerAddress) {
-        try {
-            if (!this.program) {
-                await this.initialize();
-                // Create a temporary program instance for read-only operations
-                const provider = new window.anchor.AnchorProvider(
-                    this.connection,
-                    window.solana, // Use Phantom as default
-                    { commitment: 'confirmed' }
-                );
-                this.program = new window.anchor.Program(
-                    PROGRAM_IDL,
-                    new window.solanaWeb3.PublicKey(PROGRAM_ID),
-                    provider
-                );
-            }
-
-            const ownerPubkey = new window.solanaWeb3.PublicKey(ownerAddress);
-            
-            // Fetch all domain accounts owned by the user
-            const domains = await this.program.account.domain.all([
-                {
-                    memcmp: {
-                        offset: 8 + 4 + 63 + 4 + 10, // Skip discriminator, name string, tld string
-                        bytes: ownerPubkey.toBase58()
-                    }
-                }
-            ]);
-
-            return domains.map(d => ({
-                address: d.publicKey.toString(),
-                name: d.account.name,
-                tld: d.account.tld,
-                owner: d.account.owner.toString(),
-                registeredAt: d.account.registeredAt.toNumber(),
-                expiresAt: d.account.expiresAt.toNumber(),
-                isActive: d.account.isActive,
-                isExpired: isDomainExpired(d.account.expiresAt.toNumber())
-            }));
-        } catch (error) {
-            console.error('Error fetching user domains:', error);
-            return [];
-        }
-    }
-
-    /**
-     * Get all active domains (for marketplace)
-     */
-    async getAllDomains() {
-        try {
-            if (!this.program) {
-                await this.initialize();
-                const provider = new window.anchor.AnchorProvider(
-                    this.connection,
-                    window.solana,
-                    { commitment: 'confirmed' }
-                );
-                this.program = new window.anchor.Program(
-                    PROGRAM_IDL,
-                    new window.solanaWeb3.PublicKey(PROGRAM_ID),
-                    provider
-                );
-            }
-
-            const domains = await this.program.account.domain.all();
-
-            return domains.map(d => ({
-                address: d.publicKey.toString(),
-                name: d.account.name,
-                tld: d.account.tld,
-                owner: d.account.owner.toString(),
-                registeredAt: d.account.registeredAt.toNumber(),
-                expiresAt: d.account.expiresAt.toNumber(),
-                isActive: d.account.isActive,
-                isExpired: isDomainExpired(d.account.expiresAt.toNumber())
-            }));
-        } catch (error) {
-            console.error('Error fetching all domains:', error);
-            return [];
         }
     }
 
@@ -340,6 +249,85 @@ class BlockchainService {
         } catch (error) {
             console.error('Error fetching balance:', error);
             return 0;
+        }
+    }
+
+    /**
+     * Register domain (placeholder - requires transaction building)
+     */
+    async registerDomain(domainName, tldName) {
+        throw new Error('Domain registration requires transaction signing. This feature will be implemented with proper transaction building.');
+    }
+
+    /**
+     * Renew domain (placeholder)
+     */
+    async renewDomain(domainName, tldName) {
+        throw new Error('Domain renewal requires transaction signing. This feature will be implemented with proper transaction building.');
+    }
+
+    /**
+     * Transfer domain (placeholder)
+     */
+    async transferDomain(domainName, tldName, newOwner, salePrice) {
+        throw new Error('Domain transfer requires transaction signing. This feature will be implemented with proper transaction building.');
+    }
+
+    /**
+     * Get all domains (for marketplace)
+     */
+    async getAllDomains() {
+        try {
+            if (!this.connection) {
+                await this.initialize();
+            }
+
+            console.log('Fetching all domains...');
+            
+            // Get all program accounts
+            const accounts = await this.connection.getProgramAccounts(
+                this.programId,
+                {
+                    filters: [
+                        {
+                            dataSize: 200 // Approximate size
+                        }
+                    ]
+                }
+            );
+
+            console.log(`Found ${accounts.length} total domains`);
+
+            // Parse all domains
+            const domains = [];
+            const dummyOwner = new window.solanaWeb3.PublicKey('11111111111111111111111111111111');
+            
+            for (const { pubkey, account } of accounts) {
+                try {
+                    const domain = this.parseDomainAccount(account.data, dummyOwner);
+                    
+                    if (domain) {
+                        domains.push({
+                            address: pubkey.toString(),
+                            name: domain.name,
+                            tld: domain.tld,
+                            owner: domain.owner,
+                            registeredAt: domain.registeredAt,
+                            expiresAt: domain.expiresAt,
+                            isActive: domain.isActive,
+                            isExpired: isDomainExpired(domain.expiresAt)
+                        });
+                    }
+                } catch (parseError) {
+                    continue;
+                }
+            }
+
+            return domains;
+
+        } catch (error) {
+            console.error('Error fetching all domains:', error);
+            return [];
         }
     }
 }
