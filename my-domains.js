@@ -219,7 +219,7 @@ function createDomainCard(domain) {
         
         <div class="domain-card-actions">
             <button class="btn-primary" onclick="renewDomain('${escapeHtml(domain.name)}', '${escapeHtml(domain.tld)}')">
-                Renew (${RENEWAL_FEE} SOL)
+                Renew (${(RENEWAL_FEE / 1_000_000_000)} SOL)
             </button>
             ${!domain.isListed ? `
             <button class="btn-secondary" onclick="listForSale('${escapeHtml(domain.name)}', '${escapeHtml(domain.tld)}')">
@@ -270,14 +270,14 @@ async function renewDomain(name, tld) {
     }
     
     // Check balance
-    if (walletBalance < RENEWAL_FEE) {
+    if (walletBalance < (RENEWAL_FEE / 1_000_000_000)) {
         showNotification('Insufficient SOL balance for renewal.', 'error');
         return;
     }
     
     const confirmed = confirm(
         `Renew ${name}${tld} for 1 year?\n\n` +
-        `Cost: ${RENEWAL_FEE} SOL\n` +
+        `Cost: ${(RENEWAL_FEE / 1_000_000_000)} SOL\n` +
         `Wallet: ${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}`
     );
     
@@ -341,6 +341,4 @@ async function unlistDomain(name, tld) {
     }
 }
 
-// Constants
-const RENEWAL_FEE = 0.15;
-const MARKETPLACE_FEE = 0.05;
+// Constants are defined in config.js
