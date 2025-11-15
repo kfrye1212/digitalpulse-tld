@@ -95,8 +95,9 @@ function isDomainExpired(expiresAt) {
  */
 async function getServicePDA(programId) {
     const { PublicKey } = window.solanaWeb3;
+    const encoder = new TextEncoder();
     const [pda] = await PublicKey.findProgramAddress(
-        [Buffer.from('service')],
+        [encoder.encode('service')],
         new PublicKey(programId)
     );
     return pda;
@@ -107,8 +108,12 @@ async function getServicePDA(programId) {
  */
 async function getTLDPDA(tldName, programId) {
     const { PublicKey } = window.solanaWeb3;
+    const encoder = new TextEncoder();
     const [pda] = await PublicKey.findProgramAddress(
-        [Buffer.from('tld'), Buffer.from(tldName)],
+        [
+            encoder.encode('tld'),
+            encoder.encode(tldName)
+        ],
         new PublicKey(programId)
     );
     return pda;
@@ -119,8 +124,13 @@ async function getTLDPDA(tldName, programId) {
  */
 async function getDomainPDA(domainName, tldName, programId) {
     const { PublicKey } = window.solanaWeb3;
+    const encoder = new TextEncoder();
     const [pda] = await PublicKey.findProgramAddress(
-        [Buffer.from('domain'), Buffer.from(domainName), Buffer.from(tldName)],
+        [
+            encoder.encode('domain'),
+            encoder.encode(domainName),
+            encoder.encode(tldName)
+        ],
         new PublicKey(programId)
     );
     return pda;
