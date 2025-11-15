@@ -130,8 +130,8 @@ class BlockchainService {
                 {
                     filters: [
                         {
-                            // Minimum size for domain account
-                            dataSize: 150 // Adjust if needed
+                            // Actual domain account size from on-chain data
+                            dataSize: 77
                         }
                     ]
                 }
@@ -288,7 +288,7 @@ class BlockchainService {
                 {
                     filters: [
                         {
-                            dataSize: 150 // Minimum domain account size
+                            dataSize: 77 // Actual domain account size
                         }
                     ]
                 }
