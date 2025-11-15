@@ -1,4 +1,5 @@
 // DigitalPulse TLD Blockchain Integration (Pure Solana Web3.js)
+// Based on actual deployed contract IDL
 
 class BlockchainService {
     constructor() {
@@ -53,6 +54,63 @@ class BlockchainService {
     }
 
     /**
+     * Parse domain account data based on actual IDL structure:
+     * Domain {
+     *   name: string,
+     *   tld: string,
+     *   owner: PublicKey (32 bytes),
+     *   registeredAt: i64 (8 bytes),
+     *   expiresAt: i64 (8 bytes)
+     * }
+     */
+    parseDomainAccount(data, ownerPubkey) {
+        try {
+            // Skip 8-byte discriminator (Anchor accounts start with this)
+            let offset = 8;
+
+            // Read domain name (String: 4 bytes length + UTF-8 data)
+            const nameLen = data.readUInt32LE(offset);
+            offset += 4;
+            if (nameLen > 63 || nameLen === 0) return null; // Invalid
+            const name = data.slice(offset, offset + nameLen).toString('utf8');
+            offset += nameLen;
+
+            // Read TLD (String: 4 bytes length + UTF-8 data)
+            const tldLen = data.readUInt32LE(offset);
+            offset += 4;
+            if (tldLen > 10 || tldLen === 0) return null; // Invalid
+            const tld = data.slice(offset, offset + tldLen).toString('utf8');
+            offset += tldLen;
+
+            // Read owner (32 bytes PublicKey)
+            const ownerBytes = data.slice(offset, offset + 32);
+            const owner = new window.solanaWeb3.PublicKey(ownerBytes).toString();
+            offset += 32;
+
+            // Check if this domain belongs to the requested owner
+            const isOwner = ownerPubkey ? (owner === ownerPubkey.toString()) : true;
+
+            // Read timestamps (i64 = 8 bytes each, signed)
+            const registeredAt = Number(data.readBigInt64LE(offset));
+            offset += 8;
+            const expiresAt = Number(data.readBigInt64LE(offset));
+            offset += 8;
+
+            return {
+                name,
+                tld,
+                owner,
+                isOwner,
+                registeredAt,
+                expiresAt
+            };
+        } catch (error) {
+            console.error('Error parsing domain account:', error);
+            return null;
+        }
+    }
+
+    /**
      * Get user's domains by querying program accounts
      */
     async getUserDomains(ownerAddress) {
@@ -66,15 +124,14 @@ class BlockchainService {
             console.log('Fetching domains for owner:', ownerAddress);
             
             // Get all program accounts (domains)
+            // Domain accounts are typically 150-200 bytes
             const accounts = await this.connection.getProgramAccounts(
                 this.programId,
                 {
                     filters: [
                         {
-                            // Filter by owner (offset depends on account structure)
-                            // Typical Anchor account: 8 bytes discriminator + data
-                            // We'll fetch all and filter in JS for now
-                            dataSize: 200 // Approximate size, adjust if needed
+                            // Minimum size for domain account
+                            dataSize: 150 // Adjust if needed
                         }
                     ]
                 }
@@ -92,7 +149,6 @@ class BlockchainService {
                     if (data.length < 100) continue;
 
                     // Try to deserialize domain data
-                    // This is a simplified parser - adjust offsets based on your contract
                     const domain = this.parseDomainAccount(data, ownerPubkey);
                     
                     if (domain && domain.isOwner) {
@@ -103,7 +159,6 @@ class BlockchainService {
                             owner: domain.owner,
                             registeredAt: domain.registeredAt,
                             expiresAt: domain.expiresAt,
-                            isActive: domain.isActive,
                             isExpired: isDomainExpired(domain.expiresAt)
                         });
                     }
@@ -120,62 +175,6 @@ class BlockchainService {
             console.error('Error fetching user domains:', error);
             // Return empty array instead of throwing to avoid breaking the UI
             return [];
-        }
-    }
-
-    /**
-     * Parse domain account data
-     * Note: This is a simplified parser. Adjust based on your actual account structure.
-     */
-    parseDomainAccount(data, ownerPubkey) {
-        try {
-            // Skip 8-byte discriminator (Anchor accounts start with this)
-            let offset = 8;
-
-            // Read domain name (String: 4 bytes length + data)
-            const nameLen = data.readUInt32LE(offset);
-            offset += 4;
-            if (nameLen > 63) return null; // Invalid
-            const name = data.slice(offset, offset + nameLen).toString('utf8');
-            offset += 63; // Max name length in contract
-
-            // Read TLD (String: 4 bytes length + data)
-            const tldLen = data.readUInt32LE(offset);
-            offset += 4;
-            if (tldLen > 10) return null; // Invalid
-            const tld = data.slice(offset, offset + tldLen).toString('utf8');
-            offset += 10; // Max TLD length in contract
-
-            // Read owner (32 bytes PublicKey)
-            const ownerBytes = data.slice(offset, offset + 32);
-            const owner = new window.solanaWeb3.PublicKey(ownerBytes).toString();
-            offset += 32;
-
-            // Check if this domain belongs to the requested owner
-            const isOwner = owner === ownerPubkey.toString();
-
-            // Read timestamps (i64 = 8 bytes each)
-            const registeredAt = Number(data.readBigInt64LE(offset));
-            offset += 8;
-            const expiresAt = Number(data.readBigInt64LE(offset));
-            offset += 8;
-
-            // Read boolean flags
-            const isActive = data.readUInt8(offset) === 1;
-            offset += 1;
-
-            return {
-                name,
-                tld,
-                owner,
-                isOwner,
-                registeredAt,
-                expiresAt,
-                isActive
-            };
-        } catch (error) {
-            console.error('Error parsing domain account:', error);
-            return null;
         }
     }
 
@@ -203,7 +202,7 @@ class BlockchainService {
 
             // If account exists, try to parse it
             try {
-                const domain = this.parseDomainAccount(accountInfo.data, new window.solanaWeb3.PublicKey('11111111111111111111111111111111'));
+                const domain = this.parseDomainAccount(accountInfo.data, null);
                 
                 if (domain) {
                     return {
@@ -214,7 +213,6 @@ class BlockchainService {
                             owner: domain.owner,
                             registeredAt: domain.registeredAt,
                             expiresAt: domain.expiresAt,
-                            isActive: domain.isActive,
                             isExpired: isDomainExpired(domain.expiresAt)
                         }
                     };
@@ -290,7 +288,7 @@ class BlockchainService {
                 {
                     filters: [
                         {
-                            dataSize: 200 // Approximate size
+                            dataSize: 150 // Minimum domain account size
                         }
                     ]
                 }
@@ -300,11 +298,10 @@ class BlockchainService {
 
             // Parse all domains
             const domains = [];
-            const dummyOwner = new window.solanaWeb3.PublicKey('11111111111111111111111111111111');
             
             for (const { pubkey, account } of accounts) {
                 try {
-                    const domain = this.parseDomainAccount(account.data, dummyOwner);
+                    const domain = this.parseDomainAccount(account.data, null);
                     
                     if (domain) {
                         domains.push({
@@ -314,7 +311,6 @@ class BlockchainService {
                             owner: domain.owner,
                             registeredAt: domain.registeredAt,
                             expiresAt: domain.expiresAt,
-                            isActive: domain.isActive,
                             isExpired: isDomainExpired(domain.expiresAt)
                         });
                     }
