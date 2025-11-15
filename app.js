@@ -1,5 +1,4 @@
-// TLD Options
-const TLDS = ['.pulse', '.verse', '.cp', '.pv'];
+// TLD Options (TLDS constant is defined in config.js)
 let selectedTLD = 'all';
 let walletAddress = null;
 let walletBalance = 0;
