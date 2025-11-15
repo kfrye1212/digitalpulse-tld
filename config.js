@@ -2,7 +2,9 @@
 
 // Solana Network Configuration
 const SOLANA_NETWORK = 'mainnet-beta';
-const RPC_ENDPOINT = 'https://solana-mainnet.g.alchemy.com/v2/UaMQspIS7yGvjnvQNIoaQ';
+// Using public RPC to avoid Alchemy rate limits for getProgramAccounts
+const RPC_ENDPOINT = 'https://api.mainnet-beta.solana.com';
+// Backup: 'https://solana-mainnet.g.alchemy.com/v2/UaMQspIS7yGvjnvQNIoaQ'
 
 // Contract Configuration
 const PROGRAM_ID = '2skfTcCdVRkrVdhrvQ9JTWyccgt9jmuPP2S7iT8RSEcJ';
