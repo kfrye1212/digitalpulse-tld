@@ -1,0 +1,31 @@
+# Security Contact Information for DigitalPulse TLD Smart Contract
+# This file follows the Solana security.txt standard
+# https://github.com/neodyme-labs/solana-security-txt
+
+name: "DigitalPulse TLD Name Service"
+project_url: "https://www.chainpulse.network"
+contacts: "email:security@chainpulse.network,link:https://github.com/kfrye1212/digitalpulse-tld/security/advisories/new"
+policy: "https://github.com/kfrye1212/digitalpulse-tld/blob/main/SECURITY.md"
+
+preferred_languages: "en"
+
+source_code: "https://github.com/kfrye1212/digitalpulse-tld"
+source_release: "v1.0.0"
+source_revision: "mainnet-deployment"
+
+auditors: "Self-audited - Professional audit pending"
+
+acknowledgements: "
+We appreciate security researchers who responsibly disclose vulnerabilities.
+Built on Solana blockchain with Anchor framework.
+Special thanks to the Solana and Anchor communities.
+"
+
+# Program Information
+program_id: "2skfTcCdVRkrVdhrvQ9JTWyccgt9jmuPP2S7iT8RSEcJ"
+deployment: "mainnet-beta"
+is_mainnet: true
+
+# Additional Information
+encryption: "https://github.com/kfrye1212/digitalpulse-tld/blob/main/SECURITY.md#encryption"
+expiry: "2026-11-15T00:00:00Z"
