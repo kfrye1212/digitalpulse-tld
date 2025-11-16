@@ -111,7 +111,7 @@ class BlockchainService {
     }
 
     /**
-     * Get user's domains by querying program accounts
+     * Get user's domains by querying specific PDAs (bypasses RPC restrictions)
      */
     async getUserDomains(ownerAddress) {
         try {
@@ -122,53 +122,59 @@ class BlockchainService {
             const ownerPubkey = new window.solanaWeb3.PublicKey(ownerAddress);
             
             console.log('Fetching domains for owner:', ownerAddress);
+            console.log('Querying specific domain PDAs...');
             
-            // Get all program accounts (domains)
-            // Domain accounts vary in size (70-81 bytes) based on domain name length
-            const accounts = await this.connection.getProgramAccounts(
-                this.programId,
-                {
-                    filters: []  // Get all accounts, filter by parsing
-                }
-            );
+            // Get list of claimed domains
+            if (typeof CLAIMED_DOMAINS === 'undefined') {
+                console.error('CLAIMED_DOMAINS not loaded');
+                return [];
+            }
 
-            console.log(`Found ${accounts.length} total program accounts`);
-
-            // Parse and filter domains
             const domains = [];
-            for (const { pubkey, account } of accounts) {
-                try {
-                    const data = account.data;
-                    
-                    // Skip if data is too small
-                    if (data.length < 100) continue;
+            let foundCount = 0;
+            let notFoundCount = 0;
 
-                    // Try to deserialize domain data
-                    const domain = this.parseDomainAccount(data, ownerPubkey);
+            // Query each domain PDA
+            for (const domainInfo of CLAIMED_DOMAINS) {
+                try {
+                    const domainPDA = await getDomainPDA(domainInfo.name, domainInfo.tld, PROGRAM_ID);
                     
-                    if (domain && domain.isOwner) {
-                        domains.push({
-                            address: pubkey.toString(),
-                            name: domain.name,
-                            tld: domain.tld,
-                            owner: domain.owner,
-                            registeredAt: domain.registeredAt,
-                            expiresAt: domain.expiresAt,
-                            isExpired: isDomainExpired(domain.expiresAt)
-                        });
+                    // Try to fetch the account
+                    const accountInfo = await this.connection.getAccountInfo(domainPDA);
+                    
+                    if (accountInfo && accountInfo.data) {
+                        const domain = this.parseDomainAccount(accountInfo.data, ownerPubkey);
+                        
+                        if (domain && domain.isOwner) {
+                            domains.push({
+                                address: domainPDA.toString(),
+                                name: domain.name,
+                                tld: domain.tld,
+                                owner: domain.owner,
+                                registeredAt: domain.registeredAt,
+                                expiresAt: domain.expiresAt,
+                                isExpired: isDomainExpired(domain.expiresAt)
+                            });
+                            foundCount++;
+                        } else {
+                            notFoundCount++;
+                        }
+                    } else {
+                        notFoundCount++;
                     }
-                } catch (parseError) {
-                    // Skip accounts that can't be parsed
+                } catch (err) {
+                    // Domain doesn't exist or error fetching, skip
+                    notFoundCount++;
                     continue;
                 }
             }
 
-            console.log(`Found ${domains.length} domains for owner`);
+            console.log(`Found ${foundCount} domains for owner`);
+            console.log(`${notFoundCount} domains not found or not owned by user`);
             return domains;
 
         } catch (error) {
             console.error('Error fetching user domains:', error);
-            // Return empty array instead of throwing to avoid breaking the UI
             return [];
         }
     }
